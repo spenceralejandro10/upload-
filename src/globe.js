@@ -29,16 +29,19 @@ export class Globe {
   this.scene=scene;this.group=new THREE.Group();this.spin=new THREE.Group();
   this.group.add(this.spin);this.scene.add(this.group);
   this.stars=starfield();this.scene.add(this.stars);
-  const globeMat=new THREE.MeshPhongMaterial({color:0xffffff,shininess:17,specular:0x29475e});
+  // Capa geográfica iluminada de forma uniforme: océanos y continentes visibles desde cualquier ángulo.
+  // Se prioriza la lectura de la cartografía frente a un terminador nocturno exagerado.
+  const globeMat=new THREE.MeshBasicMaterial({color:0xffffff,toneMapped:false});
   this.earth=new THREE.Mesh(new THREE.SphereGeometry(R,112,76),globeMat);
   this.spin.add(this.earth);
-  this.clouds=new THREE.Mesh(new THREE.SphereGeometry(R*1.012,112,76),new THREE.MeshPhongMaterial({color:0xffffff,transparent:true,opacity:.16,depthWrite:false}));
+  this.clouds=new THREE.Mesh(new THREE.SphereGeometry(R*1.012,112,76),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.2,depthWrite:false,side:THREE.FrontSide,toneMapped:false}));
   this.spin.add(this.clouds);
   this.spin.add(halo());
   const loader=new THREE.TextureLoader();
-  loader.load(TEXTURES.day,(t)=>{t.colorSpace=THREE.SRGBColorSpace;this.earth.material.map=t;this.earth.material.needsUpdate=true;},undefined,()=>{this.earth.material.color.set(0x25658b);});
-  loader.load(TEXTURES.normal,(t)=>{this.earth.material.bumpMap=t;this.earth.material.bumpScale=.055;this.earth.material.needsUpdate=true;},undefined,()=>{});
-  loader.load(TEXTURES.specular,(t)=>{this.earth.material.specularMap=t;this.earth.material.needsUpdate=true;},undefined,()=>{});
+  loader.load(TEXTURES.day,(t)=>{
+   t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=8;
+   this.earth.material.map=t;this.earth.material.color.set(0xffffff);this.earth.material.needsUpdate=true;
+  },undefined,()=>{this.earth.material.color.set(0x3379ad);console.warn("No se pudo descargar la textura geográfica de la Tierra");});
   loader.load(TEXTURES.clouds,(t)=>{this.clouds.material.alphaMap=t;this.clouds.material.needsUpdate=true;},undefined,()=>{this.clouds.visible=false;});
   this.marker=new THREE.Group();
   this.marker.position.copy(geo(TOKYO.lat,TOKYO.lon,R*1.035));
