@@ -5,6 +5,7 @@ import {makeAdvertising3D} from "./advertising3D.js";
 import {satelliteGround} from "./satelliteGround.js";
 import {makeStreetDetails} from "./streetDetails.js";
 import {makeFacadeBuildings} from "./facadeBuildings.js";
+import {makeMetroWorld} from "./metroWorld.js";
 
 /**
  * BLOQUES 1-3: world renderer compartido desde los datos OSM del mapa aéreo.
@@ -128,7 +129,7 @@ export function makeGeoWorld(parent,snapshot){
  polygonSurface(group,snapshot.parks,parkMat,-.066);
  polygonSurface(group,snapshot.water,waterMat,-.055);
  const streets=makeStreetDetails(group,snapshot);
- drawRails(group,snapshot.rail);
+ const metro=makeMetroWorld(group,snapshot,streets.index,{enabled:snapshot.metroEnabled!==false});
  const facades=makeFacadeBuildings(group,snapshot.buildings,{streetIndex:streets.index,
    signage:snapshot.advertisingEnabled!==false});
  const buildingCount=facades.count;
@@ -142,14 +143,14 @@ export function makeGeoWorld(parent,snapshot){
  return {group,spawn,nearby,
   surfaceHeight:streets.surfaceHeight,
   update(time){streets.update(time);advertising.update(time);},
-  dispose:()=>{imagery.dispose();streets.dispose();facades.dispose();advertising.dispose();},
+  dispose:()=>{imagery.dispose();streets.dispose();facades.dispose();advertising.dispose();metro.dispose();},
   stats:{...streets.stats,
   buildings:buildingCount,facadeStyles:facades.styleCounts,
   retailSigns:facades.signCount,roofDetails:facades.rooftopDetails,
   anchoredAds:billboardCount,adZone:advertising.zone,adBreakdown:advertising.breakdown,
   roads:snapshot.roads.length,
   parks:snapshot.parks.length,water:snapshot.water.length,
-  rail:snapshot.rail.length,billboards:billboardCount,
+  rail:snapshot.rail.length,railVisible:metro.rails,metroEntrances:metro.count,metroStations:metro.stations,metroStatus:metro.sourceStatus,billboards:billboardCount,
   geoCenter:snapshot.origin,satelliteTiles:imagery.tileCount
  }};
 }

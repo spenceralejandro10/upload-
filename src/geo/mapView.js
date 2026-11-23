@@ -14,6 +14,7 @@ import {metroGeoJSON,metroStationGeoJSON} from "./metro.js";
 import {WARD_CENTERS} from "./wardCenters.js";
 import {normalizeOSM} from "./sceneData.js";
 import {fetchCrossingDetails} from "./crossingData.js";
+import {fetchTransitFeatures} from "./transitData.js";
 
 const MAPLIBRE_URL="https://cdn.jsdelivr.net/npm/maplibre-gl@6.16.0/dist/maplibre-gl.mjs";
 const BASE_STYLE="https://tiles.openfreemap.org/styles/liberty";
@@ -41,8 +42,8 @@ export function coordinatesFor(area){
 export class TokyoAerial {
  constructor(element){
   this.element=element;this.map=null;this.lib=null;this.ready=null;
-  this.satellite=true;this.advertising=true;this.metro=false;this.landmarks=true;
-  this.markers=[];this.adMarkers=[];this.isVisible=false;
+  this.satellite=true;this.advertising=true;this.metro=true;this.landmarks=true;
+  this.markers=[];this.adMarkers=[];this.transitMarkers=[];this.transitLoad=0;this.transitCenter=null;this.isVisible=false;
  }
  async open(){
   if(this.map){this.show();this.map.resize();return this.ready;}
@@ -67,6 +68,7 @@ export class TokyoAerial {
   });
   map.on("style.load",()=>this.installLayers());
   map.on("zoom",()=>this.applyMarkerVisibility());
+  map.on("moveend",()=>{if(this.metro)void this.loadVisibleTransit();});
   await this.ready;
   this.installLayers();
   // Entrada cinematográfica: vista inicial amplia de la metrópoli y acercamiento
@@ -141,6 +143,7 @@ export class TokyoAerial {
   if(!this.markers.length)this.addPOIMarkers();
   if(!this.adMarkers.length)this.addBillboards();
   this.applyMarkerVisibility();
+  if(this.metro)void this.loadVisibleTransit();
  }
  addPOIMarkers(){
   const L=this.lib;
@@ -188,6 +191,39 @@ export class TokyoAerial {
   for(const id of ["tokyo-metro-schematic-line","tokyo-metro-stops"]){
    if(this.map?.getLayer(id))this.map.setLayoutProperty(id,"visibility",on?"visible":"none");
   }
+  if(on)void this.loadVisibleTransit();
+  else{
+   this.transitLoad++;
+   for(const marker of this.transitMarkers)marker.remove();
+   this.transitMarkers=[];this.transitCenter=null;
+  }
+ }
+ async loadVisibleTransit(){
+  if(!this.map||!this.lib||!this.metro||this.map.getZoom()<13.5)return;
+  const centerNow=this.map.getCenter().toArray();
+  if(this.transitCenter){
+   const dx=(centerNow[0]-this.transitCenter[0])*90000;
+   const dy=(centerNow[1]-this.transitCenter[1])*111319;
+   if(Math.hypot(dx,dy)<180)return;
+  }
+  this.transitCenter=centerNow;
+  const generation=++this.transitLoad;
+  const data=await fetchTransitFeatures(centerNow);
+  if(!this.map||!this.metro||generation!==this.transitLoad)return;
+  for(const marker of this.transitMarkers)marker.remove();
+  this.transitMarkers=[];
+  for(const item of [...data.entrances.slice(0,90),...data.stations.slice(0,30)]){
+   const isStation=item.railway==="station";
+   const el=document.createElement("button");
+   el.type="button";el.className="tokyo-transit-pin";
+   el.textContent=isStation?"駅":"M";
+   const name=item.name|| (isStation?"Estación registrada OSM":"Acceso registrado OSM");
+   const popup=new this.lib.Popup({offset:15,maxWidth:"250px"}).setHTML(
+    '<div class="poi-popup"><b>'+escapeHTML(name)+'</b><small>'+escapeHTML(item.code||item.railway)+'</small><p>Coordenadas OpenStreetMap · acceso de referencia. No representa un interior navegable.</p></div>');
+   el.setAttribute("aria-label",name);
+   const marker=new this.lib.Marker({element:el,anchor:"bottom"}).setLngLat(item.loc).setPopup(popup).addTo(this.map);
+   this.transitMarkers.push(marker);
+  }
  }
 
  /**
@@ -207,6 +243,7 @@ export class TokyoAerial {
   };
   const geoOrigin=[...previous.center];
   const crossingsPromise=fetchCrossingDetails(geoOrigin);
+  const transitPromise=this.metro?fetchTransitFeatures(geoOrigin):Promise.resolve({entrances:[],stations:[],status:'disabled'});
   map.stop();
   map.jumpTo({center:geoOrigin,zoom:window.innerWidth<700?16.1:16.7,pitch:0,bearing:0});
   try{
@@ -238,7 +275,10 @@ export class TokyoAerial {
    if(snapshot.buildings.length<4||snapshot.roads.length<1){
     throw new Error("Esta ubicación no dispone de suficientes calles y edificios GIS para caminar.");
    }
-   snapshot.crossings=await crossingsPromise;
+   const [crossings,transit]=await Promise.all([crossingsPromise,transitPromise]);
+   snapshot.crossings=crossings;
+   snapshot.transit=transit;
+   snapshot.metroEnabled=this.metro;
    return snapshot;
   }finally{
    // La vista aérea recupera exactamente su punto y su orientación anterior.
