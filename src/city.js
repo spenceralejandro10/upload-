@@ -37,6 +37,16 @@ export class TokyoCity{
   this.group.add(this.ambient);
   this.show();
  }
+ dispose(){
+  if(this.world?.group){
+   this.world.group.traverse(obj=>{
+    if(obj.geometry)obj.geometry.dispose();
+    if(obj.material?.isSpriteMaterial){obj.material.map?.dispose();obj.material.dispose();}
+   });
+  }
+  this.scene.remove(this.group);
+  this.group.clear();
+ }
  nearby(x,z){return this.world.nearby(x,z);}
  update(){/* Bloques de tráfico y peatones se implementarán sobre este GIS. */}
  hide(){this.group.visible=false;this.scene.fog=null;this.scene.background.set(0x020713);}
