@@ -37,3 +37,7 @@ body[data-mode="aerial"] .brand{text-shadow:0 3px 15px #071b2a}
 .tokyo-billboard.gold{background:#342310}
 @keyframes neon-pink{from{filter:brightness(.8)}to{filter:brightness(1.25)}}
 @media(max-width:760px){.aerial-panel{width:min(330px,calc(100vw - 26px));right:12px;bottom:40px;top:auto;max-height:57vh;padding:15px;transform:none}.aerial-head{margin:10px 0}.aerial-toggles{grid-template-columns:1fr 1fr;gap:8px}.aerial-toggles label{font-size:10px}.aerial-panel .primary{margin-top:5px}.aerial-disclaimer{display:none}.aerial-panel label{margin:6px 0}body[data-mode="aerial"] .masthead{top:12px;left:15px}}
+
+/* Créditos visibles también en la vista Three.js con fotografías satelitales. */
+#geo-credits{position:fixed;bottom:6px;right:12px;z-index:5;font:10px system-ui,sans-serif;color:#e2edf2;background:#101c28d9;padding:5px 8px;border-radius:5px;pointer-events:none}
+@media(max-width:760px){#geo-credits{font-size:8px;left:8px;right:auto;max-width:250px}}
