@@ -12,6 +12,7 @@ import {PLACES,placeById} from "./places.js";
 import {SIGNS} from "./billboards.js";
 import {metroGeoJSON,metroStationGeoJSON} from "./metro.js";
 import {WARD_CENTERS} from "./wardCenters.js";
+import {normalizeOSM} from "./sceneData.js";
 
 const MAPLIBRE_URL="https://cdn.jsdelivr.net/npm/maplibre-gl@6.16.0/dist/maplibre-gl.mjs";
 const BASE_STYLE="https://tiles.openfreemap.org/styles/liberty";
@@ -185,6 +186,60 @@ export class TokyoAerial {
   this.metro=!!on;
   for(const id of ["tokyo-metro-schematic-line","tokyo-metro-stops"]){
    if(this.map?.getLayer(id))this.map.setLayoutProperty(id,"visibility",on?"visible":"none");
+  }
+ }
+
+ /**
+  * ÚNICA FUENTE GIS: extrae las mismas teselas vectoriales OSM de este mapa
+  * para la escena caminable. El centro es donde mira el usuario, no un barrio
+  * falso de otro motor. querySourceFeatures solo ofrece teselas cargadas;
+  * ampliamos temporalmente en plano antes de extraerlas.
+  */
+ async captureWalkData(){
+  if(!this.map||!this.map.isStyleLoaded())throw new Error("El mapa aéreo todavía no está preparado.");
+  const map=this.map;
+  const sourceId=map.getLayer("tokyo-osm-3d")?.source;
+  if(!sourceId)throw new Error("No se encontró la fuente vectorial compartida de edificios.");
+  const previous={
+   center:map.getCenter().toArray(),zoom:map.getZoom(),
+   pitch:map.getPitch(),bearing:map.getBearing()
+  };
+  const geoOrigin=[...previous.center];
+  map.stop();
+  map.jumpTo({center:geoOrigin,zoom:window.innerWidth<700?16.1:16.7,pitch:0,bearing:0});
+  try{
+   await new Promise((resolve,reject)=>{
+    let finished=false;
+    const start=performance.now();
+    const inspect=()=>{
+     if(finished)return;
+     let ready=false;
+     try{
+      ready=map.isSourceLoaded(sourceId)&&map.querySourceFeatures(sourceId,{sourceLayer:"building"}).length>4;
+     }catch(error){/* Las teselas se están actualizando. */}
+     if(ready){finished=true;resolve();return;}
+     if(performance.now()-start>18000){
+      finished=true;reject(new Error("No se cargaron los edificios GIS de esta zona. Comprueba Internet o acércate a calles urbanas."));
+      return;
+     }
+     setTimeout(inspect,180);
+    };
+    setTimeout(inspect,250);
+   });
+   const raw={};
+   for(const name of ["building","transportation","water","landuse"]){
+    raw[name]=map.querySourceFeatures(sourceId,{sourceLayer:name});
+   }
+   const snapshot=normalizeOSM(raw,geoOrigin);
+   snapshot.view=previous;
+   snapshot.sourceId=sourceId;
+   if(snapshot.buildings.length<4||snapshot.roads.length<1){
+    throw new Error("Esta ubicación no dispone de suficientes calles y edificios GIS para caminar.");
+   }
+   return snapshot;
+  }finally{
+   // La vista aérea recupera exactamente su punto y su orientación anterior.
+   map.jumpTo(previous);
   }
  }
  flyToWard(ward){
