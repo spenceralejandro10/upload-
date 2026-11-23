@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import {insideFootprint,distanceToFootprint} from "./geo/sceneData.js";
 const skin=new THREE.MeshStandardMaterial({color:0xc48e6d}),jacket=new THREE.MeshStandardMaterial({color:0x176585}),pants=new THREE.MeshStandardMaterial({color:0x233447}),shoes=new THREE.MeshStandardMaterial({color:0xe4edf1}),hair=new THREE.MeshStandardMaterial({color:0x202329});
 function part(group,geo,mat,x,y,z){const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);group.add(m);return m;}
 function arm(root,x){
@@ -69,19 +70,19 @@ export class Player{
   });
  }
  respawn(){
-  this.root.position.set(0,.01,34);this.root.rotation.set(0,0,0);
+  const spawn=this.city?.spawn||{x:0,y:.15,z:0};
+  this.root.position.set(spawn.x,spawn.y,spawn.z);this.root.rotation.set(0,0,0);
   this.vx=0;this.vz=0;this.vy=0;this.flying=false;this.jumpCount=0;this.grounded=true;
  }
  blocker(x,z,y){
   for(const b of this.city.nearby(x,z)){
-   if(Math.abs(x-b.x)<b.halfX+.48&&Math.abs(z-b.z)<b.halfZ+.48&&y<b.height+.1&&y+1.65>0)return b;
+   if(insideFootprint(b,x,z,.46)&&y<b.height+.1&&y+1.65>b.base)return b;
   }
   return null;
  }
  climbTarget(x,z,y){
   for(const b of this.city.nearby(x,z)){
-   const dx=Math.abs(x-b.x)-b.halfX,dz=Math.abs(z-b.z)-b.halfZ;
-   if(dx<1.85&&dz<1.85&&dx>-.65&&dz>-.65&&y<b.height+.7)return b;
+   if(distanceToFootprint(x,z,b.rings)<1.8&&y<b.height+.7&&y+1.7>b.base)return b;
   }
   return null;
  }
@@ -112,7 +113,7 @@ export class Player{
   if(!this.flying&&!climbing){
    let floor=0;
    for(const b of this.city.nearby(pos.x,pos.z)){
-    if(Math.abs(pos.x-b.x)<b.halfX-.25&&Math.abs(pos.z-b.z)<b.halfZ-.25&&oldY>=b.height-.4)floor=Math.max(floor,b.height+.16);
+    if(insideFootprint(b,pos.x,pos.z)&&oldY>=b.height-.4)floor=Math.max(floor,b.height+.16);
    }
    if(pos.y<=floor){pos.y=floor;this.vy=0;this.jumpCount=0;this.grounded=true;}
    else this.grounded=false;
