@@ -1,58 +1,42 @@
-# JAPÓN 3D — de la Tierra a Tokio
+# JAPÓN 3D — Tierra y Tokio con geometría compartida
 
-**Sitio:** https://spenceralejandro10.github.io/upload-/
+Sitio: https://spenceralejandro10.github.io/upload-/
 
-La primera vista muestra el planeta Tierra. Al seleccionar Japón se abre una **vista aérea geográfica de Tokio**, con mapas y fotografía satelital real, trazado urbano, calles, zonas verdes, puertos, ríos, aeropuertos y edificios 3D a partir de huellas de OpenStreetMap.
+## Bloque 1 — Aplicado
 
-**Precisión:** el mapa aéreo es cartografía real; la geometría/altura de cada edificio depende de los datos disponibles. No todos los edificios tienen altura exacta. Los carteles luminosos son una visualización escénica, no campañas publicitarias actuales. El **modo caminable experimental** todavía utiliza un escenario procedural separado, no las calles reales.
+La vista aérea y el modo avatar ya usan la misma fuente cartográfica: las teselas vectoriales de OpenFreeMap/OpenStreetMap cargadas en MapLibre. La entrada al modo caminable extrae las huellas de edificios, trazados de calles, agua, parques y ferrocarriles de la posición que se está viendo, los transforma a metros y los dibuja en Three.js. El suelo también reutiliza fotografía aérea Esri proyectada a las mismas coordenadas.
 
-## Vistas y navegación
+No se construye una ciudad procedural distinta para el modo avatar. Los generadores anteriores de cuadrículas, calles y edificios siguen en el repositorio solo como código histórico, sin uso en la ruta principal.
 
-1. **Planeta:** arrastra para girar, rueda para ampliar; botón "Entrar a Japón".
-2. **Aérea de Tokio:** explora el mapa continuo, inclina y gira la cámara, selecciona distrito especial y barrio. Botones "Vista general" y "Cruce de Shibuya".
-3. **Capas:** activa o desactiva fotografía aérea, publicidad escénica, lugares emblemáticos y metro esquemático.
-4. **A pie (experimental):** botón de caminata, avatar con W A S D, Mayús correr, Alt+Mayús turbo, Espacio doble salto, E escalar, F volar, V cambiar cámara, R reaparecer. Esc libera el ratón.
-5. Se puede volver desde la vista a pie a la vista aérea real y desde allí a la Tierra.
+Los contornos y curvas coinciden en coordenadas con el mapa real, pero las fachadas y el ancho de las calles siguen siendo aproximados. El área caminable solo carga teselas próximas al centro; no toda Tokio al mismo tiempo.
 
-## Tokio dividido en zonas
+## Cómo probarlo
 
-Los 23 distritos especiales (ku) y 31 zonas de referencia están definidos en src/regions/wards.js. Los centros de cámara están en src/geo/wardCenters.js. El mapa no se divide físicamente en cuadrados: se desplaza continuamente por la geografía auténtica de Tokio. Haneda está en Tokio; Narita se marca en Chiba, fuera de Tokio.
+1. Entra en Japón y acerca la vista aérea a Shibuya, Kamata u otro barrio.
+2. Pulsa Entrar en la misma ciudad en 3D.
+3. El personaje aparece cerca de una calle real. Compara las curvas y huellas.
+4. Vuelve a la vista aérea y comprueba que conserva la cámara.
 
-## Bloques editables
+Controles: W A S D para caminar, Mayús correr, Alt+Mayús turbo, Espacio saltar, E escalar, F volar, V cambiar cámara y R reaparecer.
 
-| Bloque | Archivo(s) |
-|---|---|
-| Planeta y selección de Japón | src/globe.js y src/config.js |
-| Mapa aéreo real, edificios 3D, calles, parques, agua | src/geo/mapView.js |
-| Organización de 23 ku y barrios | src/regions/wards.js |
-| Centros de los distritos | src/geo/wardCenters.js |
-| Aeropuertos, hospitales, monumentos, comercios, estaciones | src/geo/places.js |
-| Publicidad luminosa escénica | src/geo/billboards.js |
-| Metro esquemático | src/geo/metro.js |
-| Calles y semáforos experimentales | src/roads.js |
-| Edificios experimentales | src/buildings.js |
-| Monumentos experimentales | src/landmarks.js |
-| Tráfico y peatones experimentales | src/actors.js |
-| Avatar y movilidad | src/player.js |
-| Generación caminable | src/city.js |
-| Control de modos y cambios de zona | src/main.js |
-| Paneles e interfaz | index.html y styles.css |
-| Validaciones de GitHub | tests/smoke.test.mjs |
+## Arquitectura por bloques
 
-**Una mejora se hace una sola vez en el generador de ese bloque y afecta a todas las instancias que lo usan.** Ver docs/ARQUITECTURA.md y docs/BLOQUES.md.
+- src/geo/mapView.js: fuente GIS y vista aérea.
+- src/geo/sceneData.js: convertir y normalizar geometrías reales.
+- src/geo/osmScene.js: dibujar las mismas huellas y curvas en Three.js.
+- src/geo/satelliteGround.js: mosaico satelital del suelo.
+- src/geo/mercator.js: proyección compartida.
+- src/regions/wards.js: 23 distritos especiales y barrios.
+- src/player.js: colisiones sobre polígonos y aparición en una calle real.
+- src/city.js: escena caminable con geometría GIS.
+- src/main.js: control de transiciones y sincronización de zonas.
+- tests/geo.test.mjs: validación de curvas, polígonos y proyección.
+- tests/smoke.test.mjs: validación de estructura y sintaxis.
 
-## Ejecución
+Consulta docs/BLOQUE-1.md, docs/ARQUITECTURA.md y docs/BLOQUES.md para las reglas y límites de desarrollo.
 
-GitHub Pages: Settings → Pages → main / root.
+## Ejecutar
 
-Localmente: ejecuta python -m http.server 8000 en la carpeta y abre http://localhost:8000. No abrir index.html directamente con file://.
+En GitHub Pages el sitio se publica desde main. Localmente se sirve con python -m http.server 8000 y se abre http://localhost:8000. Requiere WebGL e Internet.
 
-Se necesita Internet y WebGL.
-
-## Tecnología y atribuciones
-
-- Three.js 0.160.1 y MapLibre GL JS 6.16.0.
-- OpenStreetMap + OpenFreeMap: topología real de vías, parcelas, edificios, agua y parques.
-- ArcGIS World Imagery: fotografía aérea con créditos a Esri y proveedores dentro del mapa.
-- Líneas de metro de referencia (no trayectorias exactas de túneles). Las vías férreas base sí vienen de la cartografía OSM.
-- Carteles diseñados como representación visual de la publicidad luminosa de Tokio.
+Cartografía © OpenStreetMap y OpenFreeMap. Imágenes © Esri y proveedores. Three.js y MapLibre GL JS. Los carteles son ilustrativos y el metro superpuesto es esquemático.

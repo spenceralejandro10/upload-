@@ -1,33 +1,23 @@
 # Arquitectura modular — Tokio 3D
 
-## Dos motores separados
+## Una fuente cartográfica, dos vistas
 
-### Cartografía real
-src/geo/mapView.js utiliza MapLibre con OpenStreetMap/OpenFreeMap y fotografía satelital. Dibuja las huellas de los edificios con datos de altura variables, calles de verdad (no cuadrículas), ferrocarriles, parques, ríos y puntos de interés.
+MapLibre renderiza la vista aérea con datos geográficos OpenStreetMap/OpenFreeMap. La función captureWalkData en src/geo/mapView.js extrae las mismas teselas visibles y guarda la ubicación de cámara.
 
-Las ubicaciones están separadas:
-- src/regions/wards.js: 23 distritos especiales y barrios.
-- src/geo/wardCenters.js: centros de cámara aproximados.
-- src/geo/places.js: monumentos, aeropuertos, hospitales, universidades, estaciones y comercios.
-- src/geo/billboards.js: anuncios de demostración (no publicidad oficial real actual).
-- src/geo/metro.js: líneas esquemáticas de metro (no exactitud topográfica).
+src/geo/sceneData.js normaliza coordenadas, edificios, carreteras, agua y parques a metros. src/geo/osmScene.js construye la escena Three.js usando esas mismas huellas y curvas. src/geo/satelliteGround.js proyecta el mismo tipo de tesela satelital sobre el suelo. src/city.js y src/player.js gestionan el mundo y las colisiones a partir de los polígonos reales.
 
-### Mundo caminable experimental
-Three.js con src/city.js, src/roads.js, src/buildings.js, src/landmarks.js, src/actors.js y src/player.js. Los edificios y calles son todavía procedurales. La transición del mapa geográfico al avatar existe, pero **no se debe afirmar que la escena a pie es una copia exacta de Tokio**.
+La ciudad caminable deja de usar los generadores procedurales antiguos. Los dos motores siguen siendo independientes, pero comparten geometría cartográfica y posición geográfica.
 
-## Método de trabajo
+## Reglas de edición
 
-1. Elegir un bloque (p. ej. anuncios).
-2. Modificar solamente ese módulo.
-3. Revisar un punto (Shibuya), después comprobar el resto (Akihabara, Shinjuku).
-4. Verificar regresiones de Tierra, vista aérea y caminata.
-5. Guardar el cambio en un commit de GitHub.
-6. Comprobar GitHub Actions.
+1. Cambiar solo el módulo correspondiente a la mejora solicitada.
+2. No duplicar datos de calles o edificios por barrio.
+3. Probar primero en una zona y después confirmar otra zona.
+4. No mostrar una ciudad inventada si falla la descarga de GIS.
+5. Mantener los tests automáticos y publicar por commits.
 
-## Metas de precisión
+## Límites del Bloque 1
 
-El mapa satelital sí contiene la distribución geográfica real. Las alturas OSM pueden ser aproximadas; modelos particulares deben validarse individualmente. Para lograr calles caminables reales, habrá que alimentar el motor del avatar con una malla 3D generada desde datos GIS y colisiones construidas a partir de la misma cartografía.
+Se carga la zona próxima a la cámara, no toda Tokio. Las huellas de edificios y los ejes de calles proceden de OSM; algunas alturas son estimadas. Las fachadas aún son aproximadas y las anchuras de calles se representan visualmente. El parque de vehículos, semáforos, metro subterráneo y aceras precisas requieren bloques posteriores. La escena caminable no es todavía una reproducción fotogramétrica completa.
 
-## Dependencias
-
-Three.js 0.160.1, MapLibre GL JS 6.16.0, OpenFreeMap, OpenStreetMap, ArcGIS World Imagery. Los proveedores externos requieren Internet. Créditos de cartografía visibles dentro del mapa.
+Documentación detallada: BLOQUE-1.md.

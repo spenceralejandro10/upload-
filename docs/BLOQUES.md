@@ -1,29 +1,21 @@
-# Tablero de bloques — Tokio 3D
+# Bloques por subsistemas — Tokio 3D
 
-| Bloque | Módulo | Situación |
+| ID | Subsistema | Estado |
 |---|---|---|
-| 00 | Globo y continentes (src/globe.js) | Incorporado |
-| 01 | Acceso desde la Tierra (src/main.js) | Incorporado |
-| 02 | Imagen satelital aérea (src/geo/mapView.js) | Incorporado |
-| 03 | Edificios, agua, calles y parques OSM (src/geo/mapView.js) | Incorporado; precisión según datos |
-| 04 | Los 23 ku (src/regions/wards.js) | Incorporado |
-| 05 | Los barrios (src/regions/wards.js) | 31 zonas |
-| 06 | Lugares, hospitales y aeropuertos (src/geo/places.js) | Marcadores |
-| 07 | Publicidad de estilo japonés (src/geo/billboards.js) | Escénica |
-| 08 | Metro (src/geo/metro.js) | Esquemático |
-| 09 | Avatar (src/player.js) | Experimentación |
-| 10 | Calles para caminar (src/roads.js) | Procedural; pendiente GIS |
-| 11 | Edificios para caminar (src/buildings.js) | Procedural; pendiente GIS |
-| 12 | Tráfico y peatones (src/actors.js) | Experimental |
-| 13 | Monumentos caminables (src/landmarks.js) | Experimental |
-| 14 | Integración (src/main.js) | Incorporado |
-| 15 | UI (index.html y styles.css) | Incorporado |
-| 16 | Tests CI (tests/smoke.test.mjs) | Incorporado |
+| B00 | Tierra y entrada a Japón | Incorporado |
+| B01 | Una sola fuente GIS para vista aérea y avatar | Aplicado |
+| B01a | Calles curvas y huellas de edificios reales | Aplicado |
+| B01b | Suelo con fotografía aérea alineada | Aplicado |
+| B01c | Spawn y colisiones sobre huellas reales | Aplicado |
+| B02 | Andenes, cruces, bordillos y señalización | Pendiente |
+| B03 | Fachadas japonesas detalladas | Pendiente |
+| B04 | Publicidad 3D integrada en edificios | Parcial |
+| B05 | Metro, estaciones y accesos reales | Parcial |
+| B06 | Tráfico en calles reales | Pendiente |
+| B07 | Peatones en rutas reales | Pendiente |
+| B08 | Mejoras del avatar y parkour | Parcial |
+| B09 | Modelos fieles de lugares emblemáticos | Parcial |
 
-## Criterio de aprobación
+Los 23 distritos especiales y 31 barrios se gestionan en src/regions/wards.js. Los cambios comunes se aplican en el generador del bloque una sola vez. Las pruebas se ejecutan mediante GitHub Actions.
 
-Una mejora probada en una instancia debe aplicarse mediante su módulo compartido al resto; sin duplicar código ni romper otras funciones. Cada ajuste se revisa y se guarda en un commit individual.
-
-## Prioridad de siguiente fase
-
-Mantener el mapa aéreo verdadero y convertir las colisiones y las calles del mundo caminable a datos reales. Mejorar modelos particulares y pantallas con validación por edificio.
+Ver BLOQUE-1.md para el alcance verificado y sus límites.
