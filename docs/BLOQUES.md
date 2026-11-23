@@ -8,7 +8,7 @@
 | B01b | Suelo con fotografía aérea alineada | Aplicado |
 | B01c | Spawn y colisiones sobre huellas reales | Aplicado |
 | B02 | Andenes, cruces, bordillos y señalización | Aplicado (anchuras estimadas; cruces OSM opcionales) |
-| B03 | Fachadas japonesas detalladas | Pendiente |
+| B03 | Fachadas japonesas detalladas | Aplicado: ventanas, tipos arquitectónicos, escaparates y azoteas ilustrativas sobre huellas OSM |
 | B04 | Publicidad 3D integrada en edificios | Parcial |
 | B05 | Metro, estaciones y accesos reales | Parcial |
 | B06 | Tráfico en calles reales | Pendiente |
