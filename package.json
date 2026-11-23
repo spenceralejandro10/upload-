@@ -4,6 +4,6 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "test": "node tests/smoke.test.mjs && node tests/geo.test.mjs && node tests/street.test.mjs && node tests/facades.test.mjs && node tests/advertising.test.mjs"
+    "test": "node tests/smoke.test.mjs && node tests/geo.test.mjs && node tests/street.test.mjs && node tests/facades.test.mjs && node tests/advertising.test.mjs && node tests/transit.test.mjs"
   }
 }

@@ -41,3 +41,13 @@ body[data-mode="aerial"] .brand{text-shadow:0 3px 15px #071b2a}
 /* Créditos visibles también en la vista Three.js con fotografías satelitales. */
 #geo-credits{position:fixed;bottom:6px;right:12px;z-index:5;font:10px system-ui,sans-serif;color:#e2edf2;background:#101c28d9;padding:5px 8px;border-radius:5px;pointer-events:none}
 @media(max-width:760px){#geo-credits{font-size:8px;left:8px;right:auto;max-width:250px}}
+
+
+/* Bloque 5 · Accesos OSM de metro y ferrocarril sobre cartografía real */
+.tokyo-transit-pin{
+ appearance:none;border:2px solid #dceeff;border-radius:50% 50% 50% 0;
+ background:#1460ae;box-shadow:0 3px 14px #071a30b8,0 0 0 3px #b3e5ff50;
+ color:white;font-weight:900;font-size:13px;width:27px;height:27px;
+ cursor:pointer;line-height:18px;transform:rotate(-45deg);
+}
+.tokyo-transit-pin:hover{background:#2b8ce2;box-shadow:0 5px 16px #071a30d9,0 0 0 4px #69defd75}

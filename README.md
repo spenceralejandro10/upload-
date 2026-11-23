@@ -1,3 +1,11 @@
+## BLOQUE 5 — Metro y estaciones georreferenciados
+
+**Aplicado:** el mapa aéreo ahora muestra líneas esquemáticas de metro, además de marcadores de accesos y estaciones consultados en OpenStreetMap. La ciudad caminable incorpora entradas y letreros 3D ilustrativos **sobre las coordenadas OSM**, y dibuja vías férreas superficiales cuando constan en la fuente cartográfica. No se representan las vías subterráneas como carreteras visibles sobre el suelo.
+
+Los accesos etiquetados con railway=subway_entrance y railway=train_station_entrance se consultan a través de Overpass. Si no hay datos o el servicio no responde, se omiten los accesos sin inventarlos. Los interiores y túneles **todavía no son transitables**. La capa de metro se puede activar o desactivar; se activa de forma predeterminada.
+
+Archivos: src/geo/transitData.js, src/geo/metroWorld.js, src/geo/mapView.js y src/geo/metro.js. Pruebas: tests/transit.test.mjs. Ver [documentación del Bloque 5](docs/BLOQUE-5.md).
+
 # JAPÓN 3D — Tierra y Tokio con geometría compartida
 
 Sitio: https://spenceralejandro10.github.io/upload-/
