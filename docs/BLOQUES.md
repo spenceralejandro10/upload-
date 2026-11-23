@@ -7,7 +7,7 @@
 | B01a | Calles curvas y huellas de edificios reales | Aplicado |
 | B01b | Suelo con fotografía aérea alineada | Aplicado |
 | B01c | Spawn y colisiones sobre huellas reales | Aplicado |
-| B02 | Andenes, cruces, bordillos y señalización | Pendiente |
+| B02 | Andenes, cruces, bordillos y señalización | Aplicado (anchuras estimadas; cruces OSM opcionales) |
 | B03 | Fachadas japonesas detalladas | Pendiente |
 | B04 | Publicidad 3D integrada en edificios | Parcial |
 | B05 | Metro, estaciones y accesos reales | Parcial |
@@ -18,4 +18,4 @@
 
 Los 23 distritos especiales y 31 barrios se gestionan en src/regions/wards.js. Los cambios comunes se aplican en el generador del bloque una sola vez. Las pruebas se ejecutan mediante GitHub Actions.
 
-Ver BLOQUE-1.md para el alcance verificado y sus límites.
+Ver [BLOQUE-1.md](BLOQUE-1.md) y [BLOQUE-2.md](BLOQUE-2.md) para el alcance y limitaciones.

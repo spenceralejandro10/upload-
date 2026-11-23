@@ -2,6 +2,16 @@
 
 Sitio: https://spenceralejandro10.github.io/upload-/
 
+## BLOQUE 2 — Calles, andenes y cruces
+
+**Aplicado en GitHub:** el avatar ahora utiliza calzadas y rutas peatonales construidas sobre ejes reales OSM. El módulo compartido de calles añade aceras elevadas, bordillos, carriles y marcas viales. Se consultan nodos OSM etiquetados para dibujar pasos cebra, pavimento táctil y semáforos en sus ubicaciones; si la consulta a Overpass falla, estos detalles opcionales no se inventan.
+
+La posición de aparición del avatar prioriza una acera cercana libre de edificios; la altura de su suelo se adapta a la acera o calzada. El sistema se aplica a cualquier distrito mediante `src/geo/streetModel.js` y `src/geo/streetDetails.js`.
+
+**Precisión:** la forma de las calles sí procede de OSM, pero la mayoría de anchuras de calzada y aceras son estimaciones visuales. Las señales cambian de color con una animación ilustrativa, no con los ciclos reales del tráfico de Tokio. Los pasos cebra solo aparecen donde OSM indica marcas y la consulta responde.
+
+Más información: [documentación del Bloque 2](docs/BLOQUE-2.md).
+
 ## Bloque 1 — Aplicado
 
 La vista aérea y el modo avatar ya usan la misma fuente cartográfica: las teselas vectoriales de OpenFreeMap/OpenStreetMap cargadas en MapLibre. La entrada al modo caminable extrae las huellas de edificios, trazados de calles, agua, parques y ferrocarriles de la posición que se está viendo, los transforma a metros y los dibuja en Three.js. El suelo también reutiliza fotografía aérea Esri proyectada a las mismas coordenadas.
