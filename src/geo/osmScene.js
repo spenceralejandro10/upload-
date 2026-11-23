@@ -4,30 +4,17 @@ import {insideFootprint,chooseSpawn,geoToLocal} from "./sceneData.js";
 import {SIGNS} from "./billboards.js";
 import {satelliteGround} from "./satelliteGround.js";
 import {makeStreetDetails} from "./streetDetails.js";
+import {makeFacadeBuildings} from "./facadeBuildings.js";
 
 /**
- * BLOQUE 1: world renderer compartido desde los datos OSM del mapa aéreo.
+ * BLOQUES 1-3: world renderer compartido desde los datos OSM del mapa aéreo.
  * Ya no genera edificios aleatorios, manzanas rectangulares ni calles sintéticas.
  * Crea mallas 3D a partir de polígonos y líneas de la MISMA fuente OpenFreeMap.
  */
-const PALETTE=[0xa9b2b9,0x879da9,0xc0b6a9,0x9eaaa8,0x8d9fae,0xb4b9c0];
-const ROAD_STYLE={
- motorway:[0x535c65,18],trunk:[0x59616b,15],primary:[0x58616b,13],
- secondary:[0x606a72,11],tertiary:[0x606871,9],street:[0x5f666d,7.5],
- residential:[0x626b73,6.6],minor:[0x626a72,6.4],
- service:[0x676f75,4.8],living_street:[0x6e757b,4.6],
- pedestrian:[0xa6a09a,5],path:[0x9c998d,2.5],track:[0x88877c,3]
-};
 function material(color,extra={}){
  return new THREE.MeshStandardMaterial({color,roughness:.87,metalness:.07,side:THREE.DoubleSide,...extra});
 }
-const mats=PALETTE.map(c=>material(c));
-const groundMat=material(0x777f73), parkMat=material(0x669570,{transparent:true,opacity:.32}),waterMat=material(0x488db0,{transparent:true,opacity:.35,metalness:.12,roughness:.33});
-const roadMats=new Map(),railMat=material(0xbfc2b8);
-function stableIndex(b){
- const n=Math.abs(Math.floor(b.x*3+b.z*7+b.height*11));
- return n%PALETTE.length;
-}
+const groundMat=material(0x777f73),parkMat=material(0x669570,{transparent:true,opacity:.32}),waterMat=material(0x488db0,{transparent:true,opacity:.35,metalness:.12,roughness:.33});
 function ringCoords(ring){
  const pts=ring.slice(0,-1).map(p=>new THREE.Vector2(p[0],-p[1]));
  if(pts.length<3)return [];
@@ -70,25 +57,6 @@ function polygonSurface(group,polygons,mat,elevation,limit=900){
  }
  addMerged(group,geos,mat);
 }
-function buildingsLayer(group,buildings){
- const buckets=Array.from({length:PALETTE.length},()=>[]);
- const max=window.innerWidth<700?1200:3000;
- const order=buildings.slice().sort((a,b)=>(a.x*a.x+a.z*a.z)-(b.x*b.x+b.z*b.z));
- let visible=0;
- for(const b of order){
-  if(visible>=max)break;
-  const shape=polyShape(b.rings);
-  if(!shape)continue;
-  const depth=Math.max(2.2,b.height-b.base);
-  const geo=new THREE.ExtrudeGeometry(shape,{depth,steps:1,bevelEnabled:false,curveSegments:1});
-  geo.rotateX(-Math.PI/2);
-  geo.translate(0,b.base+.09,0);
-  buckets[stableIndex(b)].push(geo);
-  visible++;
- }
- for(let i=0;i<buckets.length;i++)addMerged(group,buckets[i],mats[i]);
- return visible;
-}
 function ribbonMesh(parent,lines,color,width,y){
  const positions=[];
  for(const line of lines){
@@ -112,19 +80,6 @@ function ribbonMesh(parent,lines,color,width,y){
  geometry.computeVertexNormals();
  const mesh=new THREE.Mesh(geometry,material(color,{metalness:0,roughness:1}));
  mesh.frustumCulled=false;parent.add(mesh);
-}
-function drawRoads(parent,roads){
- const categories=new Map();
- for(const r of roads){
-  const style=ROAD_STYLE[r.kind]||ROAD_STYLE.residential;
-  const key=r.kind in ROAD_STYLE?r.kind:"residential";
-  if(!categories.has(key))categories.set(key,[]);
-  categories.get(key).push(r);
- }
- for(const [kind,lines] of categories){
-  const [color,width]=ROAD_STYLE[kind];
-  ribbonMesh(parent,lines,color,width,.045);
- }
 }
 function drawRails(parent,rail){
  ribbonMesh(parent,rail,0x38464f,3.2,.13);
@@ -205,7 +160,8 @@ export function makeGeoWorld(parent,snapshot){
  polygonSurface(group,snapshot.water,waterMat,-.055);
  const streets=makeStreetDetails(group,snapshot);
  drawRails(group,snapshot.rail);
- const buildingCount=buildingsLayer(group,snapshot.buildings);
+ const facades=makeFacadeBuildings(group,snapshot.buildings,{streetIndex:streets.index});
+ const buildingCount=facades.count;
  const billboardCount=decorate(group,snapshot);
  const nearby=buildSpatialIndex(snapshot.buildings);
  const sidewalk=streets.spawn;
@@ -214,9 +170,11 @@ export function makeGeoWorld(parent,snapshot){
  return {group,spawn,nearby,
   surfaceHeight:streets.surfaceHeight,
   update:streets.update,
-  dispose:()=>{imagery.dispose();streets.dispose();},
+  dispose:()=>{imagery.dispose();streets.dispose();facades.dispose();},
   stats:{...streets.stats,
-  buildings:buildingCount,roads:snapshot.roads.length,
+  buildings:buildingCount,facadeStyles:facades.styleCounts,
+  retailSigns:facades.signCount,roofDetails:facades.rooftopDetails,
+  roads:snapshot.roads.length,
   parks:snapshot.parks.length,water:snapshot.water.length,
   rail:snapshot.rail.length,billboards:billboardCount,
   geoCenter:snapshot.origin,satelliteTiles:imagery.tileCount

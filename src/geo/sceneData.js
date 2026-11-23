@@ -126,7 +126,20 @@ export function normalizeOSM(raw,origin){
       const bounds=extentOf(rings);
       if(!nearArea(bounds)||bounds.halfX<.7||bounds.halfZ<.7)continue;
       const base=num(f.properties?.render_min_height,0),height=approximateHeight(f.properties||{});
-      buildings.push({...bounds,rings,height:Math.max(height,base+2),base,sourceId:f.id??f.properties?.osm_id??null});
+      const p=f.properties||{};
+      const tags={
+       building:p.building??p.type??p.class??null,
+       class:p.class??null,
+       "building:levels":p["building:levels"]??p.render_levels??null,
+       "building:material":p["building:material"]??null,
+       "building:colour":p["building:colour"]??p["building:color"]??null,
+       "roof:shape":p["roof:shape"]??null,
+       "roof:material":p["roof:material"]??null,
+       shop:p.shop??null,office:p.office??null,
+       amenity:p.amenity??null,tourism:p.tourism??null
+      };
+      buildings.push({...bounds,rings,height:Math.max(height,base+2),base,tags,
+        sourceId:f.id??p.osm_id??null});
     }
   }
   for(const [type,output] of [["transportation",roads],["water",water],["landuse",parks]]){
