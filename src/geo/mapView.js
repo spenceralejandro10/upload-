@@ -67,7 +67,9 @@ export class TokyoAerial {
   map.on("zoom",()=>this.applyMarkerVisibility());
   await this.ready;
   this.installLayers();
-  map.easeTo({center:[139.735,35.686],zoom:12.3,pitch:62,bearing:-23,duration:4100});
+  // Entrada cinematográfica: vista inicial amplia de la metrópoli y acercamiento
+  // a su cruce más reconocido, donde aparecen fachadas y pantallas.
+  map.flyTo({center:[139.70055,35.65947],zoom:15.6,pitch:65,bearing:-29,duration:6100,essential:true});
   return this;
  }
  installLayers(){
