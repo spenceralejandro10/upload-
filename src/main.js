@@ -162,7 +162,7 @@ async function walkInCity(){
   $("hud-zone").textContent="TOKIO · "+lat.toFixed(4)+"° N · "+lng.toFixed(4)+"° E";
   $("geo-credits")?.classList.remove("hidden");
   const stats=city.stats;
-  toast("Datos reales: "+stats.buildings+" edificios y "+stats.roads+" trazos de calles de la misma vista aérea.");
+  toast("Tokio GIS: "+stats.buildings+" edificios · "+stats.sidewalkCount+" aceras · "+stats.zebra+" pasos cebra · "+stats.signals+" semáforos OSM.");
  }catch(error){
   console.error("Error al convertir Tokio en escena caminable:",error);
   if(mode==="walk"){
