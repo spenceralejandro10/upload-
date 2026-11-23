@@ -3,7 +3,7 @@ import {OrbitControls} from "three/addons/controls/OrbitControls.js";
 import {Globe} from "./globe.js";
 import {TokyoCity} from "./city.js";
 import {Player} from "./player.js";
-import {WARDS,findDistrict} from "./config.js";
+import {WARDS,DISTRICTS,findDistrict} from "./config.js";
 import {TokyoAerial,coordinatesFor} from "./geo/mapView.js";
 
 const $=id=>document.getElementById(id);
@@ -44,6 +44,19 @@ function fillAreas(wardId,selected=null){
  const current=ward.areas.some(a=>a.id===selected)?selected:ward.areas[0].id;
  areaSelect.value=current;legacySelect.value=current;
  return findDistrict(current);
+}
+function syncAreaWithCamera(origin){
+  let closest=null,min=Infinity;
+  for(const area of DISTRICTS){
+   const pos=coordinatesFor(area);
+   const dx=(pos[0]-origin[0])*91100,dz=(pos[1]-origin[1])*111319;
+   const dist=Math.hypot(dx,dz);
+   if(dist<min){min=dist;closest=area;}
+  }
+  if(closest&&min<2500){
+   wardSelect.value=closest.wardId;
+   fillAreas(closest.wardId,closest.id);
+  }
 }
 wardSelect.value="shibuya";
 fillAreas("shibuya","shibuya");
@@ -86,6 +99,7 @@ async function viewAerial(){
  $("aerial-panel").classList.remove("hidden");
  $("crosshair").classList.add("hidden");$("hud").classList.add("hidden");
  $("hint").classList.add("hidden");
+ $("geo-credits")?.classList.add("hidden");
  $("subtitle").textContent="TOKIO · CARTOGRAFÍA 3D REAL";
  $("aerial-loading").classList.remove("hidden");
  $("aerial-map").style.display="block";
@@ -125,6 +139,7 @@ async function walkInCity(){
  aerial.show();
  try{
   const snapshot=await aerial.captureWalkData();
+  syncAreaWithCamera(snapshot.origin);
   const nextCity=new TokyoCity(scene,snapshot);
   if(city){city.dispose();}
   city=nextCity;
@@ -145,6 +160,7 @@ async function walkInCity(){
   $("subtitle").textContent="TOKIO · LA MISMA CIUDAD EN VISTA AÉREA Y A PIE";
   const [lng,lat]=snapshot.origin;
   $("hud-zone").textContent="TOKIO · "+lat.toFixed(4)+"° N · "+lng.toFixed(4)+"° E";
+  $("geo-credits")?.classList.remove("hidden");
   const stats=city.stats;
   toast("Datos reales: "+stats.buildings+" edificios y "+stats.roads+" trazos de calles de la misma vista aérea.");
  }catch(error){
@@ -175,6 +191,7 @@ function returnEarth(){
  $("hint").classList.remove("hidden");$("hint").classList.remove("city");
  $("hint").textContent="LA TIERRA ES EXPLORABLE · JAPÓN ES EL ÚNICO DESTINO ACTIVO";
  $("crosshair").classList.add("hidden");$("hud").classList.add("hidden");
+ $("geo-credits")?.classList.add("hidden");
  $("subtitle").textContent="EXPLORACIÓN PLANETARIA · CAPÍTULO 01";
  $("enter-btn").disabled=false;$("enter-btn").innerHTML="ENTRAR A JAPÓN <span>↗</span>";
 }
