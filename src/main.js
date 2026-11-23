@@ -4,7 +4,7 @@ import {Globe} from "./globe.js";
 import {TokyoCity} from "./city.js";
 import {Player} from "./player.js";
 import {WARDS,findDistrict} from "./config.js";
-import {TokyoAerial} from "./geo/mapView.js";
+import {TokyoAerial,coordinatesFor} from "./geo/mapView.js";
 
 const $=id=>document.getElementById(id);
 const canvas=$("experience"),scene=new THREE.Scene();
@@ -60,7 +60,11 @@ legacySelect.addEventListener("change",()=>{
  const area=findDistrict(legacySelect.value);
  if(wardSelect.value!==area.wardId){wardSelect.value=area.wardId;fillAreas(area.wardId,area.id);}
  else areaSelect.value=area.id;
- if(mode==="walk"&&city){city.build(area.id);player.respawn();$("hud-zone").textContent=area.name.toUpperCase()+" · TOKIO";}
+ if(mode==="walk"&&city){
+  aerial.show();
+  aerial.map?.jumpTo({center:coordinatesFor(area),zoom:16.6,pitch:62,bearing:-25});
+  void walkInCity();
+ }
 });
 $("satellite-toggle").addEventListener("change",e=>aerial.setSatellite(e.target.checked));
 $("advertising-toggle").addEventListener("change",e=>aerial.setBillboards(e.target.checked));
@@ -106,23 +110,56 @@ function enterJapan(){
  $("enter-btn").disabled=true;
  $("enter-btn").textContent="DESCENDIENDO A TOKIO…";
 }
-function walkInCity(){
- const district=findDistrict(areaSelect.value);
- mode="walk";document.body.dataset.mode="walk";transition=0;
- aerial.hide();globe.hide();orbit.enabled=false;
- if(!city)city=new TokyoCity(scene,district.id);
- else{city.show();city.build(district.id);}
- if(!player)player=new Player(scene,camera,canvas,city);
- player.city=city;player.enabled=true;player.root.visible=true;player.respawn();
- player.yaw=0;player.pitch=.1;camera.position.set(0,9,50);
- $("aerial-panel").classList.add("hidden");$("country-panel").classList.add("hidden");
- $("city-panel").classList.remove("hidden");
- $("crosshair").classList.remove("hidden");$("hud").classList.remove("hidden");
- $("hint").classList.remove("hidden");$("hint").classList.add("city");
- $("hint").textContent="MODO EXPERIMENTAL DE CAMINATA · HAZ CLIC EN LA CIUDAD PARA USAR WASD Y RATÓN";
- $("subtitle").textContent="TOKIO · PROTOTIPO CAMINABLE";
- $("hud-zone").textContent=district.name.toUpperCase()+" · TOKIO";
- toast("Caminata experimental: las calles 3D todavía son procedurales, no cartografía real.");
+let buildingWalk=false;
+async function walkInCity(){
+ if(buildingWalk)return;
+ if(!aerial.map){toast("Primero carga la cartografía aérea de Tokio.");return;}
+ buildingWalk=true;
+ const button=$("walk-btn");
+ const oldText=button.innerHTML;
+ button.disabled=true;button.textContent="GENERANDO CALLES Y EDIFICIOS REALES…";
+ $("aerial-loading").classList.remove("hidden");
+ $("aerial-loading").querySelector("b").textContent="PREPARANDO TOKIO REAL";
+ $("aerial-loading").querySelector("small").textContent="Sincronizando calles, curvas y huellas de los edificios con la vista aérea…";
+ // No se oculta la vista aérea hasta comprobar que los datos GIS se cargaron.
+ aerial.show();
+ try{
+  const snapshot=await aerial.captureWalkData();
+  const nextCity=new TokyoCity(scene,snapshot);
+  if(city){city.dispose();}
+  city=nextCity;
+  if(!player)player=new Player(scene,camera,canvas,city);
+  player.city=city;
+  player.enabled=true;
+  player.root.visible=true;
+  player.respawn();
+  player.yaw=0;player.pitch=.1;
+  camera.position.set(city.spawn.x,city.spawn.y+9,city.spawn.z+18);
+  mode="walk";document.body.dataset.mode="walk";transition=0;
+  aerial.hide();globe.hide();orbit.enabled=false;
+  $("aerial-panel").classList.add("hidden");$("country-panel").classList.add("hidden");
+  $("city-panel").classList.remove("hidden");
+  $("crosshair").classList.remove("hidden");$("hud").classList.remove("hidden");
+  $("hint").classList.remove("hidden");$("hint").classList.add("city");
+  $("hint").textContent="GEOMETRÍA GIS DE TOKIO · CALLES Y EDIFICIOS DERIVADOS DEL MISMO MAPA AÉREO";
+  $("subtitle").textContent="TOKIO · LA MISMA CIUDAD EN VISTA AÉREA Y A PIE";
+  const [lng,lat]=snapshot.origin;
+  $("hud-zone").textContent="TOKIO · "+lat.toFixed(4)+"° N · "+lng.toFixed(4)+"° E";
+  const stats=city.stats;
+  toast("Datos reales: "+stats.buildings+" edificios y "+stats.roads+" trazos de calles de la misma vista aérea.");
+ }catch(error){
+  console.error("Error al convertir Tokio en escena caminable:",error);
+  if(mode==="walk"){
+   // Mantener el anterior barrio si falla un cambio de zona.
+   aerial.hide();if(city)city.show();
+   if(player)player.enabled=true;
+  }else{aerial.show();}
+  toast("No se pudo sincronizar esta zona: "+error.message);
+ }finally{
+  buildingWalk=false;
+  $("aerial-loading").classList.add("hidden");
+  button.disabled=false;button.innerHTML=oldText;
+ }
 }
 function returnEarth(){
  if(document.pointerLockElement)document.exitPointerLock();
