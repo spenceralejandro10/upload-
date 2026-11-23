@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#020714">
 <title>JAPÓN 3D · De la Tierra a Tokio</title>
 <link rel="stylesheet" href="./styles.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@6.16.0/dist/maplibre-gl.css">
 <script type="importmap">
 {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/"}}
 </script>
@@ -18,6 +19,32 @@
  <div class="brand">EARTH <b>/</b> JAPAN</div>
  <div class="tagline" id="subtitle">EXPLORACIÓN PLANETARIA · CAPÍTULO 01</div>
 </header>
+
+<!-- La vista aerea usa cartografia real de Tokio; el canvas Three.js queda separado. -->
+<div id="aerial-map" aria-label="Cartografía satelital y tridimensional real de Tokio"></div>
+<div id="aerial-loading" class="hidden"><span class="loading-ring"></span><b>ABRIENDO TOKIO REAL</b><small>Cargando edificios, calles, parques y estaciones…</small></div>
+<aside id="aerial-panel" class="panel aerial-panel hidden">
+ <div class="eyebrow"><span class="pulse"></span> CARTOGRAFÍA REAL · TOKIO 3D</div>
+ <div class="aerial-head"><span class="jp small">東京</span><div><h2>EXPLORA TOKIO</h2><p>Calles, ríos, parques y edificios geográficos</p></div></div>
+ <label for="ward-select">DISTRITO ESPECIAL · KU</label>
+ <select id="ward-select"></select>
+ <label for="area-select">BARRIO / LUGAR</label>
+ <select id="area-select"></select>
+ <div class="aerial-actions">
+  <button id="panorama-btn" class="secondary">VISTA GENERAL DE TOKIO</button>
+  <button id="shibuya-btn" class="secondary">VER EL CRUCE DE SHIBUYA</button>
+ </div>
+ <div class="aerial-toggles">
+  <label><input type="checkbox" id="satellite-toggle" checked> Fotografía aérea real</label>
+  <label><input type="checkbox" id="advertising-toggle" checked> Publicidad y pantallas de Tokio</label>
+  <label><input type="checkbox" id="places-toggle" checked> Edificios y lugares emblemáticos</label>
+  <label><input type="checkbox" id="metro-toggle"> Metro · líneas de referencia</label>
+ </div>
+ <button id="walk-btn" class="primary">CAMINAR EN 3D EXPERIMENTAL <span>↗</span></button>
+ <p class="aerial-disclaimer">La vista aérea utiliza coordenadas y huellas reales de OpenStreetMap. El modo caminable aún es una simulación procedural, no una copia exacta de las calles.</p>
+ <button id="aerial-back-btn" class="secondary">← VOLVER AL PLANETA</button>
+</aside>
+
 <aside id="country-panel" class="panel">
  <div class="eyebrow"><span class="pulse"></span> DESTINO DISPONIBLE 01 / 01</div>
  <div class="jp">日本</div>
@@ -44,6 +71,7 @@
   <div><kbd>V</kbd> <span>Cambiar de cámara</span></div>
   <div><kbd>R</kbd> <span>Reaparecer</span></div>
  </div>
+ <button id="back-aerial-btn" class="secondary">↑ VOLVER A LA VISTA AÉREA REAL</button>
  <button id="back-btn" class="secondary">← VOLVER A LA TIERRA</button>
 </aside>
 <div id="hint" class="hint">LA TIERRA ES EXPLORABLE · JAPÓN ES EL ÚNICO DESTINO ACTIVO</div>
