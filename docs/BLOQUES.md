@@ -9,7 +9,7 @@
 | B01c | Spawn y colisiones sobre huellas reales | Aplicado |
 | B02 | Andenes, cruces, bordillos y señalización | Aplicado (anchuras estimadas; cruces OSM opcionales) |
 | B03 | Fachadas japonesas detalladas | Aplicado: ventanas, tipos arquitectónicos, escaparates y azoteas ilustrativas sobre huellas OSM |
-| B04 | Publicidad 3D integrada en edificios | Parcial |
+| B04 | Publicidad LED 3D sobre edificios OSM | Aplicado: pantallas de fachada, anuncios locales y marcos de neón, densidad por zona |
 | B05 | Metro, estaciones y accesos reales | Parcial |
 | B06 | Tráfico en calles reales | Pendiente |
 | B07 | Peatones en rutas reales | Pendiente |
@@ -18,4 +18,4 @@
 
 Los 23 distritos especiales y 31 barrios se gestionan en src/regions/wards.js. Los cambios comunes se aplican en el generador del bloque una sola vez. Las pruebas se ejecutan mediante GitHub Actions.
 
-Ver [BLOQUE-1.md](BLOQUE-1.md) y [BLOQUE-2.md](BLOQUE-2.md) para el alcance y limitaciones.
+Detalles: [Bloque 1](BLOQUE-1.md), [Bloque 2](BLOQUE-2.md), [Bloque 3](BLOQUE-3.md) y [Bloque 4](BLOQUE-4.md).

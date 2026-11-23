@@ -2,6 +2,16 @@
 
 Sitio: https://spenceralejandro10.github.io/upload-/
 
+## BLOQUE 4 — Publicidad 3D integrada en edificios
+
+**Aplicado:** carteles electrónicos, pantallas grandes, rótulos japoneses, marcos luminosos y efectos de iluminación adaptados a la densidad comercial de zonas como Shibuya, Kabukichō, Akihabara y Ginza.
+
+Las pantallas están **ancladas a fachadas reales de OpenStreetMap** y orientadas hacia calles reales; no son sprites flotando por encima del mapa. Los anuncios generados son ilustrativos, no campañas reales de empresas. Los puntos conocidos de `src/geo/billboards.js` sirven como referencias geográficas de zona, sin garantizar el edificio exacto del anuncio.
+
+La opción **Publicidad y pantallas de Tokio** también se respeta al entrar al modo a pie. Los letreros comparten geometría mediante instancias para mejorar el rendimiento.
+
+Implementación: `src/geo/adPlacement.js`, `src/geo/advertising3D.js`. Pruebas: `tests/advertising.test.mjs`. [Ver Bloque 4](docs/BLOQUE-4.md).
+
 ## BLOQUE 3 — Fachadas japonesas en los mismos edificios OSM
 
 **Aplicado:** los edificios caminables ahora tienen nueve familias visuales (viviendas, apartamentos, comercios, usos mixtos, oficinas, torres acristaladas, hoteles, industria y equipamientos), con ventanas, marcos, reflejos y balcones ilustrativos. Se añadieron escaparates a nivel de calle, algunos rótulos genéricos en japonés y equipos de azotea en determinados edificios.
