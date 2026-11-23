@@ -252,7 +252,7 @@ export function makeFacadeBuildings(parent,buildings,options={}){
    const x=b.x+(profile.seed%3-1)*1.5,z=b.z+((profile.seed>>3)%3-1)*1.5;
    if(insideFootprint(b,x,z,-0))hvac.push({x,z,y:topY,seed:profile.seed,width:Math.min(3.6,b.halfX/2),depth:Math.min(3.4,b.halfZ/2)});
   }
-  if(profile.commercial&&b.base<2&&h>=7&&profile.seed%4===0&&commercial<110&&Math.abs(b.x)<500&&Math.abs(b.z)<500){
+  if(options.signage!==false&&profile.commercial&&b.base<2&&h>=7&&profile.seed%4===0&&commercial<110&&Math.abs(b.x)<500&&Math.abs(b.z)<500){
    const front=streetFront(b,options.streetIndex);
    if(front){
     const idx=profile.seed%SIGN_TEXT.length;

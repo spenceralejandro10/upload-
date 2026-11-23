@@ -129,7 +129,8 @@ export function makeGeoWorld(parent,snapshot){
  polygonSurface(group,snapshot.water,waterMat,-.055);
  const streets=makeStreetDetails(group,snapshot);
  drawRails(group,snapshot.rail);
- const facades=makeFacadeBuildings(group,snapshot.buildings,{streetIndex:streets.index});
+ const facades=makeFacadeBuildings(group,snapshot.buildings,{streetIndex:streets.index,
+   signage:snapshot.advertisingEnabled!==false});
  const buildingCount=facades.count;
  const advertising=makeAdvertising3D(group,snapshot,streets.index,
    {max:snapshot.advertisingEnabled===false?0:undefined});
