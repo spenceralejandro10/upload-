@@ -2,6 +2,16 @@
 
 Sitio: https://spenceralejandro10.github.io/upload-/
 
+## BLOQUE 3 — Fachadas japonesas en los mismos edificios OSM
+
+**Aplicado:** los edificios caminables ahora tienen nueve familias visuales (viviendas, apartamentos, comercios, usos mixtos, oficinas, torres acristaladas, hoteles, industria y equipamientos), con ventanas, marcos, reflejos y balcones ilustrativos. Se añadieron escaparates a nivel de calle, algunos rótulos genéricos en japonés y equipos de azotea en determinados edificios.
+
+**La ciudad no cambia:** las fachadas se aplican a las mismas huellas, coordenadas y alturas del mapa geográfico del Bloque 1. Los estilos son aproximaciones cuando faltan datos específicos de OSM; no se han recreado los materiales reales de cada edificio.
+
+Los cambios a un estilo se aplican por módulo a todas las zonas. Implementado en `src/geo/facadeStyles.js` y `src/geo/facadeBuildings.js`; pruebas en `tests/facades.test.mjs`.
+
+Documentación: [Bloque 3](docs/BLOQUE-3.md).
+
 ## BLOQUE 2 — Calles, andenes y cruces
 
 **Aplicado en GitHub:** el avatar ahora utiliza calzadas y rutas peatonales construidas sobre ejes reales OSM. El módulo compartido de calles añade aceras elevadas, bordillos, carriles y marcas viales. Se consultan nodos OSM etiquetados para dibujar pasos cebra, pavimento táctil y semáforos en sus ubicaciones; si la consulta a Overpass falla, estos detalles opcionales no se inventan.
@@ -34,6 +44,7 @@ Controles: W A S D para caminar, Mayús correr, Alt+Mayús turbo, Espacio saltar
 - src/geo/mapView.js: fuente GIS y vista aérea.
 - src/geo/sceneData.js: convertir y normalizar geometrías reales.
 - src/geo/osmScene.js: dibujar las mismas huellas y curvas en Three.js.
+- src/geo/facadeStyles.js y src/geo/facadeBuildings.js: tipologías visuales, ventanas, escaparates y azoteas sobre edificios OSM.
 - src/geo/satelliteGround.js: mosaico satelital del suelo.
 - src/geo/mercator.js: proyección compartida.
 - src/regions/wards.js: 23 distritos especiales y barrios.
@@ -43,7 +54,7 @@ Controles: W A S D para caminar, Mayús correr, Alt+Mayús turbo, Espacio saltar
 - tests/geo.test.mjs: validación de curvas, polígonos y proyección.
 - tests/smoke.test.mjs: validación de estructura y sintaxis.
 
-Consulta docs/BLOQUE-1.md, docs/ARQUITECTURA.md y docs/BLOQUES.md para las reglas y límites de desarrollo.
+Consulta docs/BLOQUE-1.md, docs/BLOQUE-2.md, docs/BLOQUE-3.md, docs/ARQUITECTURA.md y docs/BLOQUES.md para las reglas y límites de desarrollo.
 
 ## Ejecutar
 
