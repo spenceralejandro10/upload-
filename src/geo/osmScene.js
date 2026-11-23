@@ -3,6 +3,7 @@ import {mergeGeometries} from "three/addons/utils/BufferGeometryUtils.js";
 import {insideFootprint,chooseSpawn,geoToLocal} from "./sceneData.js";
 import {SIGNS} from "./billboards.js";
 import {satelliteGround} from "./satelliteGround.js";
+import {makeStreetDetails} from "./streetDetails.js";
 
 /**
  * BLOQUE 1: world renderer compartido desde los datos OSM del mapa aéreo.
@@ -202,13 +203,19 @@ export function makeGeoWorld(parent,snapshot){
  const imagery=satelliteGround(group,snapshot.origin);
  polygonSurface(group,snapshot.parks,parkMat,-.066);
  polygonSurface(group,snapshot.water,waterMat,-.055);
- drawRoads(group,snapshot.roads);
+ const streets=makeStreetDetails(group,snapshot);
  drawRails(group,snapshot.rail);
  const buildingCount=buildingsLayer(group,snapshot.buildings);
  const billboardCount=decorate(group,snapshot);
  const nearby=buildSpatialIndex(snapshot.buildings);
- const spawn=safeSpawn(snapshot,nearby);
- return {group,spawn,nearby,dispose:()=>imagery.dispose(),stats:{
+ const sidewalk=streets.spawn;
+ const spawn=sidewalk&&!nearby(sidewalk.x,sidewalk.z).some(b=>insideFootprint(b,sidewalk.x,sidewalk.z,.6))
+   ?sidewalk:safeSpawn(snapshot,nearby);
+ return {group,spawn,nearby,
+  surfaceHeight:streets.surfaceHeight,
+  update:streets.update,
+  dispose:()=>{imagery.dispose();streets.dispose();},
+  stats:{...streets.stats,
   buildings:buildingCount,roads:snapshot.roads.length,
   parks:snapshot.parks.length,water:snapshot.water.length,
   rail:snapshot.rail.length,billboards:billboardCount,

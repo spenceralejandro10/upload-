@@ -50,7 +50,8 @@ export class TokyoCity{
   this.group.clear();
  }
  nearby(x,z){return this.world.nearby(x,z);}
- update(){/* Bloques de tráfico y peatones se implementarán sobre este GIS. */}
+ floorHeight(x,z){return this.world?.surfaceHeight?.(x,z)??0;}
+ update(dt,time){this.world?.update?.(time);}
  hide(){this.group.visible=false;this.scene.fog=null;this.scene.background.set(0x020713);}
  show(){
   this.group.visible=true;

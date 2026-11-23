@@ -143,7 +143,10 @@ export function normalizeOSM(raw,origin){
         for(const line of linesForGeometry(f.geometry)){
           const points=simplifyLine(line.map(p=>geoToLocal(p,origin)));
           if(points.length<2||!nearArea(extentOf([points])))continue;
-          const obj={points,kind:category,subclass:sub,sourceId:f.id??null};
+          const obj={points,kind:category,subclass:sub,sourceId:f.id??null,
+           brunnel:String(f.properties?.brunnel||""),surface:String(f.properties?.surface||""),
+           oneway:String(f.properties?.oneway||""),width:f.properties?.width??null,
+           layer:f.properties?.layer??null,foot:f.properties?.foot??null};
           (isRail?rail:output).push(obj);
         }
       }else{

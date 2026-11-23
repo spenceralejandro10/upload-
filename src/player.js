@@ -111,7 +111,7 @@ export class Player{
   pos.x=THREE.MathUtils.clamp(nx,-1250,1250);
   pos.z=THREE.MathUtils.clamp(nz,-1250,1250);
   if(!this.flying&&!climbing){
-   let floor=0;
+   let floor=this.city.floorHeight?.(pos.x,pos.z)??0;
    for(const b of this.city.nearby(pos.x,pos.z)){
     if(insideFootprint(b,pos.x,pos.z)&&oldY>=b.height-.4)floor=Math.max(floor,b.height+.16);
    }

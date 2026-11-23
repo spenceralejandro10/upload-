@@ -13,6 +13,7 @@ import {SIGNS} from "./billboards.js";
 import {metroGeoJSON,metroStationGeoJSON} from "./metro.js";
 import {WARD_CENTERS} from "./wardCenters.js";
 import {normalizeOSM} from "./sceneData.js";
+import {fetchCrossingDetails} from "./crossingData.js";
 
 const MAPLIBRE_URL="https://cdn.jsdelivr.net/npm/maplibre-gl@6.16.0/dist/maplibre-gl.mjs";
 const BASE_STYLE="https://tiles.openfreemap.org/styles/liberty";
@@ -205,6 +206,7 @@ export class TokyoAerial {
    pitch:map.getPitch(),bearing:map.getBearing()
   };
   const geoOrigin=[...previous.center];
+  const crossingsPromise=fetchCrossingDetails(geoOrigin);
   map.stop();
   map.jumpTo({center:geoOrigin,zoom:window.innerWidth<700?16.1:16.7,pitch:0,bearing:0});
   try{
@@ -236,6 +238,7 @@ export class TokyoAerial {
    if(snapshot.buildings.length<4||snapshot.roads.length<1){
     throw new Error("Esta ubicación no dispone de suficientes calles y edificios GIS para caminar.");
    }
+   snapshot.crossings=await crossingsPromise;
    return snapshot;
   }finally{
    // La vista aérea recupera exactamente su punto y su orientación anterior.
