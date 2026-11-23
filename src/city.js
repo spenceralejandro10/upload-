@@ -14,6 +14,7 @@ export class TokyoCity{
  }
  build(snapshot){
   if(!snapshot?.origin)throw new Error("TokyoCity requiere datos reales normalizados de la vista aérea.");
+  this.world?.dispose?.();
   this.group.clear();
   if(this.world?.group){
    this.world.group.traverse(object=>{
@@ -38,6 +39,7 @@ export class TokyoCity{
   this.show();
  }
  dispose(){
+  this.world?.dispose?.();
   if(this.world?.group){
    this.world.group.traverse(obj=>{
     if(obj.geometry)obj.geometry.dispose();
