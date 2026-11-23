@@ -1,28 +1,29 @@
-# Tablero de desarrollo por bloques
+# Tablero de bloques — Tokio 3D
 
-| Bloque | Sistema | Archivo central | Primera versión |
-|---|---|---|---|
-| B00 | Globo y continentes | src/globe.js | Tierra satelital y estrellas |
-| B01 | Acceso a Japón | src/main.js | Entrada y regreso al planeta |
-| B02 | Calles | src/roads.js | Calzadas, marcas, cruces |
-| B03 | Andenes y semáforos | src/roads.js | Aceras, postes y luces |
-| B04 | Edificios | src/buildings.js | Fachadas y alturas compartidas |
-| B05 | Monumentos | src/landmarks.js | Torre de Tokio, Skytree, templo |
-| B06 | Carros | src/actors.js | Tráfico móvil |
-| B07 | Peatones | src/actors.js | Personas con movimiento |
-| B08 | Avatar | src/player.js | Correr, saltar, escalar, volar |
-| B09 | Cámaras | src/player.js | Primera y tercera persona |
-| B10 | Barrios | src/config.js y src/city.js | 7 sectores de Tokio |
-| B11 | Interfaz | index.html, styles.css | HUD, selector, controles |
-| B12 | Pruebas | Pendiente | Test visual y rendimiento |
+| Bloque | Módulo | Situación |
+|---|---|---|
+| 00 | Globo y continentes (src/globe.js) | Incorporado |
+| 01 | Acceso desde la Tierra (src/main.js) | Incorporado |
+| 02 | Imagen satelital aérea (src/geo/mapView.js) | Incorporado |
+| 03 | Edificios, agua, calles y parques OSM (src/geo/mapView.js) | Incorporado; precisión según datos |
+| 04 | Los 23 ku (src/regions/wards.js) | Incorporado |
+| 05 | Los barrios (src/regions/wards.js) | 31 zonas |
+| 06 | Lugares, hospitales y aeropuertos (src/geo/places.js) | Marcadores |
+| 07 | Publicidad de estilo japonés (src/geo/billboards.js) | Escénica |
+| 08 | Metro (src/geo/metro.js) | Esquemático |
+| 09 | Avatar (src/player.js) | Experimentación |
+| 10 | Calles para caminar (src/roads.js) | Procedural; pendiente GIS |
+| 11 | Edificios para caminar (src/buildings.js) | Procedural; pendiente GIS |
+| 12 | Tráfico y peatones (src/actors.js) | Experimental |
+| 13 | Monumentos caminables (src/landmarks.js) | Experimental |
+| 14 | Integración (src/main.js) | Incorporado |
+| 15 | UI (index.html y styles.css) | Incorporado |
+| 16 | Tests CI (tests/smoke.test.mjs) | Incorporado |
 
-## Para cerrar un bloque
+## Criterio de aprobación
 
-- Mejora aislada y verificable en una zona.
-- Mismo resultado en todas las instancias del modelo compartido.
-- Ninguna regresión en la Tierra, el acceso a Japón o el avatar.
-- Confirmación del cambio mediante commit.
+Una mejora probada en una instancia debe aplicarse mediante su módulo compartido al resto; sin duplicar código ni romper otras funciones. Cada ajuste se revisa y se guarda en un commit individual.
 
-## Estado
+## Prioridad de siguiente fase
 
-v0.1 (2026-11-23): primeros módulos y navegación Tierra → Japón → barrios de Tokio. Las calles y los edificios urbanos aún no son georreferenciados.
+Mantener el mapa aéreo verdadero y convertir las colisiones y las calles del mundo caminable a datos reales. Mejorar modelos particulares y pantallas con validación por edificio.

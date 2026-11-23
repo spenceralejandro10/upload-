@@ -1,46 +1,58 @@
-# Japón 3D | De la Tierra a Tokio
+# JAPÓN 3D — de la Tierra a Tokio
 
-Experiencia tridimensional de navegador: planeta Tierra con **mapa geográfico real**, iluminación, nubes y marcador de Japón. **Solo Japón se puede abrir en modo calle**. Desde el globo se entra a Tokio y se puede explorar una maqueta urbana con personaje propio, peatones, vehículos, edificios y monumentos.
+**Sitio:** https://spenceralejandro10.github.io/upload-/
 
-**Versión 0.1:** el planeta usa cartografía visual auténtica; los barrios de Tokio son una simulación procedural e inspirada en lugares reales, no una réplica exacta del callejero.
+La primera vista muestra el planeta Tierra. Al seleccionar Japón se abre una **vista aérea geográfica de Tokio**, con mapas y fotografía satelital real, trazado urbano, calles, zonas verdes, puertos, ríos, aeropuertos y edificios 3D a partir de huellas de OpenStreetMap.
 
-## Lanzamiento
+**Precisión:** el mapa aéreo es cartografía real; la geometría/altura de cada edificio depende de los datos disponibles. No todos los edificios tienen altura exacta. Los carteles luminosos son una visualización escénica, no campañas publicitarias actuales. El **modo caminable experimental** todavía utiliza un escenario procedural separado, no las calles reales.
 
-GitHub Pages: Settings → Pages → Deploy from a branch → main → /(root).
+## Vistas y navegación
 
-Después del despliegue, la página puede abrirse desde https://spenceralejandro10.github.io/upload-/ .
+1. **Planeta:** arrastra para girar, rueda para ampliar; botón "Entrar a Japón".
+2. **Aérea de Tokio:** explora el mapa continuo, inclina y gira la cámara, selecciona distrito especial y barrio. Botones "Vista general" y "Cruce de Shibuya".
+3. **Capas:** activa o desactiva fotografía aérea, publicidad escénica, lugares emblemáticos y metro esquemático.
+4. **A pie (experimental):** botón de caminata, avatar con W A S D, Mayús correr, Alt+Mayús turbo, Espacio doble salto, E escalar, F volar, V cambiar cámara, R reaparecer. Esc libera el ratón.
+5. Se puede volver desde la vista a pie a la vista aérea real y desde allí a la Tierra.
 
-Para ejecutar en un servidor local:
-- En la carpeta del repositorio, ejecutar: python -m http.server 8000
-- Visitar http://localhost:8000
+## Tokio dividido en zonas
 
-Three.js y las texturas terrestres se cargan desde Internet.
-
-## Controles
-
-**Tierra:** arrastrar el ratón para girar, rueda para acercar, clic en el marcador de Japón o botón de entrada. Otros países no se pueden abrir.
-
-**Tokio:** W A S D para moverse; Mayús correr; Alt + Mayús turbo; Espacio salto/doble salto; E escalar junto a fachadas; F volar; Espacio/Ctrl subir/bajar durante vuelo; V alternar cámara; R reaparecer. Haz clic en la ciudad para capturar el ratón, Esc para liberarlo.
+Los 23 distritos especiales (ku) y 31 zonas de referencia están definidos en src/regions/wards.js. Los centros de cámara están en src/geo/wardCenters.js. El mapa no se divide físicamente en cuadrados: se desplaza continuamente por la geografía auténtica de Tokio. Haneda está en Tokio; Narita se marca en Chiba, fuera de Tokio.
 
 ## Bloques editables
 
-| Qué queremos ajustar | Archivo |
+| Bloque | Archivo(s) |
 |---|---|
-| Tierra, continentes y nubes | src/globe.js |
-| País habilitado y barrios | src/config.js |
-| Calles y andenes | src/roads.js |
-| Modelos, fachadas y edificios | src/buildings.js |
-| Monumentos | src/landmarks.js |
-| Carros y peatones | src/actors.js |
-| Generación de las zonas | src/city.js |
-| Avatar, movimiento y cámaras | src/player.js |
-| Entrada y salida de Japón | src/main.js |
-| Diseño de la interfaz | styles.css |
+| Planeta y selección de Japón | src/globe.js y src/config.js |
+| Mapa aéreo real, edificios 3D, calles, parques, agua | src/geo/mapView.js |
+| Organización de 23 ku y barrios | src/regions/wards.js |
+| Centros de los distritos | src/geo/wardCenters.js |
+| Aeropuertos, hospitales, monumentos, comercios, estaciones | src/geo/places.js |
+| Publicidad luminosa escénica | src/geo/billboards.js |
+| Metro esquemático | src/geo/metro.js |
+| Calles y semáforos experimentales | src/roads.js |
+| Edificios experimentales | src/buildings.js |
+| Monumentos experimentales | src/landmarks.js |
+| Tráfico y peatones experimentales | src/actors.js |
+| Avatar y movilidad | src/player.js |
+| Generación caminable | src/city.js |
+| Control de modos y cambios de zona | src/main.js |
+| Paneles e interfaz | index.html y styles.css |
+| Validaciones de GitHub | tests/smoke.test.mjs |
 
-Arquitectura: [docs/ARQUITECTURA.md](docs/ARQUITECTURA.md).
+**Una mejora se hace una sola vez en el generador de ese bloque y afecta a todas las instancias que lo usan.** Ver docs/ARQUITECTURA.md y docs/BLOQUES.md.
 
-Tablero del proyecto: [docs/BLOQUES.md](docs/BLOQUES.md).
+## Ejecución
 
-## Licencias y tecnología
+GitHub Pages: Settings → Pages → main / root.
 
-Proyecto JavaScript ES Modules + Three.js 0.160.1. Las imágenes satelitales de la Tierra están referenciadas desde los ejemplos de Three.js (datos visuales geográficos reales). No se almacena ninguna fotografía privada ni se utiliza una clave API.
+Localmente: ejecuta python -m http.server 8000 en la carpeta y abre http://localhost:8000. No abrir index.html directamente con file://.
+
+Se necesita Internet y WebGL.
+
+## Tecnología y atribuciones
+
+- Three.js 0.160.1 y MapLibre GL JS 6.16.0.
+- OpenStreetMap + OpenFreeMap: topología real de vías, parcelas, edificios, agua y parques.
+- ArcGIS World Imagery: fotografía aérea con créditos a Esri y proveedores dentro del mapa.
+- Líneas de metro de referencia (no trayectorias exactas de túneles). Las vías férreas base sí vienen de la cartografía OSM.
+- Carteles diseñados como representación visual de la publicidad luminosa de Tokio.

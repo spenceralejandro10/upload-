@@ -1,42 +1,33 @@
-# Arquitectura técnica · Japón 3D
+# Arquitectura modular — Tokio 3D
 
-## Objetivo
+## Dos motores separados
 
-**No hay que reescribir toda la ciudad para corregir un solo objeto.** Las reglas viven en módulos independientes. Por ejemplo, una modificación a la función que genera fachadas se aplica a todos los edificios que usan ese generador.
+### Cartografía real
+src/geo/mapView.js utiliza MapLibre con OpenStreetMap/OpenFreeMap y fotografía satelital. Dibuja las huellas de los edificios con datos de altura variables, calles de verdad (no cuadrículas), ferrocarriles, parques, ríos y puntos de interés.
 
-## Flujo y dependencias
+Las ubicaciones están separadas:
+- src/regions/wards.js: 23 distritos especiales y barrios.
+- src/geo/wardCenters.js: centros de cámara aproximados.
+- src/geo/places.js: monumentos, aeropuertos, hospitales, universidades, estaciones y comercios.
+- src/geo/billboards.js: anuncios de demostración (no publicidad oficial real actual).
+- src/geo/metro.js: líneas esquemáticas de metro (no exactitud topográfica).
 
-index.html → src/main.js
-- Globe (src/globe.js)
-  - Mapa satelital del planeta con continentes reales
-  - Marcador de Japón calculado por latitud/longitud
-- TokyoCity (src/city.js)
-  - src/roads.js → calles, aceras, cruces y semáforos
-  - src/buildings.js → modelos reutilizados, alturas y colisiones
-  - src/landmarks.js → monumentos y señas del barrio
-  - src/actors.js → automóviles y peatones
-- Player (src/player.js)
-  - Movimiento, cámara, parkour, vuelo y animación
-- src/config.js
-  - Coordenadas y configuraciones por distrito
+### Mundo caminable experimental
+Three.js con src/city.js, src/roads.js, src/buildings.js, src/landmarks.js, src/actors.js y src/player.js. Los edificios y calles son todavía procedurales. La transición del mapa geográfico al avatar existe, pero **no se debe afirmar que la escena a pie es una copia exacta de Tokio**.
 
-## Reglas
+## Método de trabajo
 
-1. Un cambio de calles se efectúa en src/roads.js; uno de fachadas en src/buildings.js.
-2. No hacer copias independientes del mismo sistema para cada barrio.
-3. Los parámetros propios de un barrio pertenecen a src/config.js.
-4. Mantener las APIs públicas: makeRoads, makeBuildings, makeLandmark, makeActors, TokyoCity, Player y Globe.
-5. Probar el cambio en un barrio antes de comprobar su propagación a los demás.
-6. Crear commits separados por bloque funcional.
+1. Elegir un bloque (p. ej. anuncios).
+2. Modificar solamente ese módulo.
+3. Revisar un punto (Shibuya), después comprobar el resto (Akihabara, Shinjuku).
+4. Verificar regresiones de Tierra, vista aérea y caminata.
+5. Guardar el cambio en un commit de GitHub.
+6. Comprobar GitHub Actions.
 
-## Cartografía
+## Metas de precisión
 
-La textura global representa continentes auténticos. La ciudad es todavía una maqueta procedural inspirada en Tokio; **no se debe confundir con una réplica cartográfica 1:1**. En versiones posteriores se podrán sustituir los generadores por datos geográficos de OSM y modelos con coordenadas, conservando el resto de los módulos.
-
-## Rendimiento
-
-Los edificios comparten geometría y se dibujan mediante InstancedMesh agrupado por material. Las colisiones consultan una cuadrícula local. Cada distrito se construye al seleccionarse, para evitar que toda Tokio esté en la memoria simultáneamente.
+El mapa satelital sí contiene la distribución geográfica real. Las alturas OSM pueden ser aproximadas; modelos particulares deben validarse individualmente. Para lograr calles caminables reales, habrá que alimentar el motor del avatar con una malla 3D generada desde datos GIS y colisiones construidas a partir de la misma cartografía.
 
 ## Dependencias
 
-Three.js ES modules 0.160.1 desde jsDelivr, texturas terrestres de los ejemplos de threejs.org. Requiere Internet y un navegador compatible con WebGL. Para ejecutar localmente, servir la carpeta por HTTP.
+Three.js 0.160.1, MapLibre GL JS 6.16.0, OpenFreeMap, OpenStreetMap, ArcGIS World Imagery. Los proveedores externos requieren Internet. Créditos de cartografía visibles dentro del mapa.
