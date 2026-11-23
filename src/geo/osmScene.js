@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import {mergeGeometries} from "three/addons/utils/BufferGeometryUtils.js";
-import {insideFootprint,chooseSpawn,geoToLocal} from "./sceneData.js";
-import {SIGNS} from "./billboards.js";
+import {insideFootprint,chooseSpawn} from "./sceneData.js";
+import {makeAdvertising3D} from "./advertising3D.js";
 import {satelliteGround} from "./satelliteGround.js";
 import {makeStreetDetails} from "./streetDetails.js";
 import {makeFacadeBuildings} from "./facadeBuildings.js";
@@ -85,37 +85,6 @@ function drawRails(parent,rail){
  ribbonMesh(parent,rail,0x38464f,3.2,.13);
  ribbonMesh(parent,rail,0xd7dee1,1.25,.145);
 }
-function makeSign(group,advertisement,center){
- const c=document.createElement("canvas");c.width=512;c.height=180;
- const ctx=c.getContext("2d");
- ctx.fillStyle="#07172a";ctx.fillRect(0,0,512,180);
- ctx.fillStyle=advertisement.accent||"#7afafa";ctx.fillRect(6,7,500,8);ctx.fillRect(6,165,500,8);
- ctx.textAlign="center";ctx.textBaseline="middle";ctx.font="bold 78px sans-serif";
- ctx.fillStyle="#ffffff";ctx.fillText(advertisement.title,256,80,490);
- ctx.font="bold 26px sans-serif";ctx.fillStyle=advertisement.accent||"#7afafa";
- ctx.fillText(advertisement.subtitle,256,141,480);
- const texture=new THREE.CanvasTexture(c);texture.colorSpace=THREE.SRGBColorSpace;
- const m=new THREE.SpriteMaterial({map:texture,depthTest:true,transparent:true});
- const sign=new THREE.Sprite(m);
- sign.scale.set(15,5.3,1);
- sign.position.set(center.x,Math.max(13,Math.min(58,center.height*.72)),center.z);
- group.add(sign);
-}
-function decorate(group,snapshot){
- let count=0;
- for(const ad of SIGNS){
-  const [x,z]=geoToLocal(ad.loc,snapshot.origin);
-  if(Math.abs(x)>650||Math.abs(z)>650)continue;
-  let nearest=null,d=Infinity;
-  for(const b of snapshot.buildings){
-   const dd=(b.x-x)**2+(b.z-z)**2;
-   if(dd<d){d=dd;nearest=b;}
-  }
-  if(!nearest||d>95*95)continue;
-  makeSign(group,ad,nearest);count++;
- }
- return count;
-}
 function buildSpatialIndex(buildings){
  const cell=100,grid=new Map();
  for(const b of buildings){
@@ -162,18 +131,21 @@ export function makeGeoWorld(parent,snapshot){
  drawRails(group,snapshot.rail);
  const facades=makeFacadeBuildings(group,snapshot.buildings,{streetIndex:streets.index});
  const buildingCount=facades.count;
- const billboardCount=decorate(group,snapshot);
+ const advertising=makeAdvertising3D(group,snapshot,streets.index,
+   {max:snapshot.advertisingEnabled===false?0:undefined});
+ const billboardCount=advertising.count;
  const nearby=buildSpatialIndex(snapshot.buildings);
  const sidewalk=streets.spawn;
  const spawn=sidewalk&&!nearby(sidewalk.x,sidewalk.z).some(b=>insideFootprint(b,sidewalk.x,sidewalk.z,.6))
    ?sidewalk:safeSpawn(snapshot,nearby);
  return {group,spawn,nearby,
   surfaceHeight:streets.surfaceHeight,
-  update:streets.update,
-  dispose:()=>{imagery.dispose();streets.dispose();facades.dispose();},
+  update(time){streets.update(time);advertising.update(time);},
+  dispose:()=>{imagery.dispose();streets.dispose();facades.dispose();advertising.dispose();},
   stats:{...streets.stats,
   buildings:buildingCount,facadeStyles:facades.styleCounts,
   retailSigns:facades.signCount,roofDetails:facades.rooftopDetails,
+  anchoredAds:billboardCount,adZone:advertising.zone,adBreakdown:advertising.breakdown,
   roads:snapshot.roads.length,
   parks:snapshot.parks.length,water:snapshot.water.length,
   rail:snapshot.rail.length,billboards:billboardCount,

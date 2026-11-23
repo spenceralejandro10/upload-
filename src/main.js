@@ -139,6 +139,7 @@ async function walkInCity(){
  aerial.show();
  try{
   const snapshot=await aerial.captureWalkData();
+  snapshot.advertisingEnabled=aerial.advertising;
   syncAreaWithCamera(snapshot.origin);
   const nextCity=new TokyoCity(scene,snapshot);
   if(city){city.dispose();}
