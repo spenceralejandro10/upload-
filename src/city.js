@@ -1,31 +1,48 @@
 import * as THREE from "three";
-import {DISTRICTS} from "./config.js";
-import {makeRoads} from "./roads.js";
-import {makeBuildings} from "./buildings.js";
-import {makeActors} from "./actors.js";
-import {makeLandmark} from "./landmarks.js";
+import {makeGeoWorld} from "./geo/osmScene.js";
+
+/**
+ * BLOQUE 1 — misma geometría geográfica que el mapa aéreo.
+ * Prohibido generar manzanas, edificios o carreteras al azar desde city.js.
+ */
 export class TokyoCity{
- constructor(scene,id="shibuya"){
-  this.scene=scene;this.group=new THREE.Group();scene.add(this.group);
-  this.scene.fog=new THREE.FogExp2(0xa7b7c4,.00165);
-  this.build(id);
+ constructor(scene,snapshot){
+  this.scene=scene;
+  this.group=new THREE.Group();
+  this.scene.add(this.group);
+  this.build(snapshot);
  }
- build(id){
-  if(this.group.children.length){
-   this.group.traverse(obj=>{if(obj.isMesh&&obj.geometry)obj.geometry.dispose();if(obj.isInstancedMesh)obj.dispose();});
-   this.group.clear();
+ build(snapshot){
+  if(!snapshot?.origin)throw new Error("TokyoCity requiere datos reales normalizados de la vista aérea.");
+  this.group.clear();
+  if(this.world?.group){
+   this.world.group.traverse(object=>{
+    if(object.geometry)object.geometry.dispose();
+    if(object.material){
+     for(const mat of Array.isArray(object.material)?object.material:[object.material]){
+      // Los materiales reutilizados por el módulo se mantienen.
+      if(mat?.isSpriteMaterial){mat.map?.dispose();mat.dispose();}
+     }
+    }
+   });
   }
-  this.district=DISTRICTS.find(d=>d.id===id)||DISTRICTS[0];
-  this.road=makeRoads(this.group,this.district);
-  this.buildings=makeBuildings(this.group,this.district);
-  makeLandmark(this.group,this.district);
-  this.actors=makeActors(this.group,this.district);
-  const sun=new THREE.DirectionalLight(0xffefdb,2.15);sun.position.set(-210,490,170);this.group.add(sun);
-  const amb=new THREE.HemisphereLight(0xd8ecff,0x475c6b,2.4);this.group.add(amb);
-  this.scene.background=new THREE.Color(0x9abbd4);
+  this.snapshot=snapshot;
+  this.world=makeGeoWorld(this.group,snapshot);
+  this.spawn=this.world.spawn;
+  this.stats=this.world.stats;
+  this.sun=new THREE.DirectionalLight(0xfff1d8,2.45);
+  this.sun.position.set(270,470,170);
+  this.group.add(this.sun);
+  this.ambient=new THREE.HemisphereLight(0xdaeafb,0x526775,2.1);
+  this.group.add(this.ambient);
+  this.show();
  }
- nearby(x,z){return this.buildings.nearby(x,z);}
- update(dt,time){this.road.update(time);this.actors.update(dt,time);}
- show(){this.group.visible=true;this.scene.fog=new THREE.FogExp2(0xa7b7c4,.00165);this.scene.background=new THREE.Color(0x9abbd4);}
- hide(){this.group.visible=false;this.scene.fog=null;this.scene.background=new THREE.Color(0x020713);}
+ nearby(x,z){return this.world.nearby(x,z);}
+ update(){/* Bloques de tráfico y peatones se implementarán sobre este GIS. */}
+ hide(){this.group.visible=false;this.scene.fog=null;this.scene.background.set(0x020713);}
+ show(){
+  this.group.visible=true;
+  this.scene.background=new THREE.Color(0x91b7d1);
+  this.scene.fog=new THREE.FogExp2(0x99b6ca,.0012);
+ }
 }
