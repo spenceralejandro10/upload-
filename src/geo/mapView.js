@@ -97,6 +97,24 @@ export class TokyoAerial {
     "fill-extrusion-vertical-gradient":true
    }
   });
+  // Agua, parques y calles reproducen trazos reales, no una cuadrícula sintética.
+  if(!map.getLayer("tokyo-osm-water"))map.addLayer({
+   id:"tokyo-osm-water",type:"fill",source:sourceId,"source-layer":"water",
+   minzoom:10,paint:{"fill-color":"#418eb0","fill-opacity":.23}
+  });
+  if(!map.getLayer("tokyo-osm-parks"))map.addLayer({
+   id:"tokyo-osm-parks",type:"fill",source:sourceId,"source-layer":"landuse",
+   minzoom:10,
+   filter:["in",["get","class"],["literal",["park","forest","wood","grass","garden","cemetery"]]],
+   paint:{"fill-color":"#72b68a","fill-opacity":.18}
+  });
+  if(!map.getLayer("tokyo-osm-roads"))map.addLayer({
+   id:"tokyo-osm-roads",type:"line",source:sourceId,"source-layer":"transportation",minzoom:13,
+   filter:["in",["get","class"],["literal",["primary","secondary","tertiary","minor","service","residential","motorway","trunk"]]],
+   layout:{"line-join":"round","line-cap":"round"},
+   paint:{"line-color":"#f4f2e8","line-opacity":["interpolate",["linear"],["zoom"],13,.18,17,.65],
+     "line-width":["interpolate",["linear"],["zoom"],13,.4,15,1.6,18,4]}
+  });
   // Ferrocarril visto desde arriba: datos reales del mapa.
   if(!map.getLayer("tokyo-osm-rail"))map.addLayer({
    id:"tokyo-osm-rail",type:"line",source:sourceId,"source-layer":"transportation",
