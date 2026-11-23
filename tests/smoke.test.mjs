@@ -5,7 +5,8 @@ const modules=[
  "src/config.js","src/globe.js","src/roads.js","src/buildings.js","src/landmarks.js",
  "src/actors.js","src/city.js","src/player.js","src/main.js","src/regions/wards.js",
  "src/geo/mapView.js","src/geo/wardCenters.js","src/geo/places.js",
- "src/geo/billboards.js","src/geo/metro.js"
+ "src/geo/billboards.js","src/geo/metro.js","src/geo/sceneData.js",
+ "src/geo/osmScene.js","src/geo/satelliteGround.js","src/geo/mercator.js"
 ];
 for(const path of modules){
  assert.ok(existsSync(path),"Falta módulo: "+path);

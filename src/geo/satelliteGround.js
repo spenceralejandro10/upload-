@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import {geoToLocal} from "./sceneData.js";
+import {lonLatToTile,tileToLonLat} from "./mercator.js";
 
 /**
  * Satélite Esri World Imagery proyectado sobre el mismo marco geográfico
@@ -7,15 +8,6 @@ import {geoToLocal} from "./sceneData.js";
  * La imagen se carga por teselas; si una falla queda el terreno de respaldo.
  */
 const ENDPOINT="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/";
-const DEG=Math.PI/180;
-export function lonLatToTile(lon,lat,zoom) {
- const n=2**zoom,phi=Math.max(-85.05,Math.min(85.05,lat))*DEG;
- return [(lon+180)/360*n,(1-Math.asinh(Math.tan(phi))/Math.PI)/2*n];
-}
-export function tileToLonLat(x,y,zoom) {
- const n=2**zoom;
- return [x/n*360-180,Math.atan(Math.sinh(Math.PI*(1-2*y/n)))/DEG];
-}
 export function satelliteGround(group,origin,options={}){
  const isSmall=typeof window!=="undefined"&&window.innerWidth<700;
  const zoom=options.zoom??(isSmall?16:17);

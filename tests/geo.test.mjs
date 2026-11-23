@@ -3,7 +3,7 @@ import {
  geoToLocal,localToGeo,normalizeOSM,insideFootprint,
  insidePolygon,distanceToSegment,chooseSpawn
 } from "../src/geo/sceneData.js";
-import {lonLatToTile,tileToLonLat} from "../src/geo/satelliteGround.js";
+import {lonLatToTile,tileToLonLat} from "../src/geo/mercator.js";
 
 const origin=[139.7005,35.6594];
 const p=[139.7008,35.6597];
