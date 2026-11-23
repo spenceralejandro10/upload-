@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#020714">
+<title>JAPÓN 3D · De la Tierra a Tokio</title>
+<link rel="stylesheet" href="./styles.css">
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.1/examples/jsm/"}}
+</script>
+</head>
+<body>
+<canvas id="experience" aria-label="Simulador tridimensional de la Tierra y Tokio"></canvas>
+<div id="vignette"></div>
+<header class="masthead">
+ <div class="symbol">地球 <span>→</span> 日本</div>
+ <div class="brand">EARTH <b>/</b> JAPAN</div>
+ <div class="tagline" id="subtitle">EXPLORACIÓN PLANETARIA · CAPÍTULO 01</div>
+</header>
+<aside id="country-panel" class="panel">
+ <div class="eyebrow"><span class="pulse"></span> DESTINO DISPONIBLE 01 / 01</div>
+ <div class="jp">日本</div>
+ <h1>Japón</h1>
+ <p>Una Tierra realista, con océanos y continentes auténticos. Solo Japón está abierto para exploración terrestre.</p>
+ <div class="pair"><span>Continente</span><strong>Asia oriental</strong></div>
+ <div class="pair"><span>Ciudad inicial</span><strong>Tokio</strong></div>
+ <div class="pair"><span>Coordenadas</span><strong>35.6762° N · 139.6503° E</strong></div>
+ <button id="enter-btn" class="primary">ENTRAR A JAPÓN <span>↗</span></button>
+ <p class="micro">Arrastra para girar la Tierra · rueda para acercar</p>
+</aside>
+<aside id="city-panel" class="panel hidden">
+ <div class="eyebrow"><span class="pulse"></span> EXPLORACIÓN TERRESTRE</div>
+ <div class="city-head"><div class="jp small">東京</div><div><h2>TOKIO</h2><p>Ciudad modular · versión 0.1</p></div></div>
+ <label for="district">BARRIO / ZONA</label>
+ <select id="district"></select>
+ <div class="controls-table">
+  <div><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> <span>Moverse</span></div>
+  <div><kbd>⇧</kbd> <span>Correr</span></div>
+  <div><kbd>ALT</kbd> + <kbd>⇧</kbd> <span>Turbo</span></div>
+  <div><kbd>ESPACIO</kbd> <span>Saltar / doble salto</span></div>
+  <div><kbd>E</kbd> <span>Escalar fachadas</span></div>
+  <div><kbd>F</kbd> <span>Volar / aterrizar</span></div>
+  <div><kbd>V</kbd> <span>Cambiar de cámara</span></div>
+  <div><kbd>R</kbd> <span>Reaparecer</span></div>
+ </div>
+ <button id="back-btn" class="secondary">← VOLVER A LA TIERRA</button>
+</aside>
+<div id="hint" class="hint">LA TIERRA ES EXPLORABLE · JAPÓN ES EL ÚNICO DESTINO ACTIVO</div>
+<div id="crosshair" class="hidden">+</div>
+<div id="hud" class="hidden"><span id="hud-zone">SHIBUYA · TOKIO</span><b id="hud-speed">0 km/h</b><span id="hud-mode">CAMINAR</span></div>
+<div id="toast" role="status"></div>
+<div id="loading"><div class="loading-ring"></div><strong>JAPÓN 3D</strong><span>INICIALIZANDO EL PLANETA</span></div>
+<div id="error" class="hidden"></div>
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
