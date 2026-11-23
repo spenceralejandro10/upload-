@@ -2,6 +2,7 @@ import * as THREE from "three";
 import {mergeGeometries} from "three/addons/utils/BufferGeometryUtils.js";
 import {insideFootprint,chooseSpawn,geoToLocal} from "./sceneData.js";
 import {SIGNS} from "./billboards.js";
+import {satelliteGround} from "./satelliteGround.js";
 
 /**
  * BLOQUE 1: world renderer compartido desde los datos OSM del mapa aéreo.
@@ -20,7 +21,7 @@ function material(color,extra={}){
  return new THREE.MeshStandardMaterial({color,roughness:.87,metalness:.07,side:THREE.DoubleSide,...extra});
 }
 const mats=PALETTE.map(c=>material(c));
-const groundMat=material(0x777f73), parkMat=material(0x669570),waterMat=material(0x488db0,{metalness:.12,roughness:.33});
+const groundMat=material(0x777f73), parkMat=material(0x669570,{transparent:true,opacity:.32}),waterMat=material(0x488db0,{transparent:true,opacity:.35,metalness:.12,roughness:.33});
 const roadMats=new Map(),railMat=material(0xbfc2b8);
 function stableIndex(b){
  const n=Math.abs(Math.floor(b.x*3+b.z*7+b.height*11));
@@ -198,6 +199,7 @@ export function makeGeoWorld(parent,snapshot){
  const group=new THREE.Group();parent.add(group);
  const ground=new THREE.Mesh(new THREE.PlaneGeometry(2200,2200),groundMat);
  ground.rotation.x=-Math.PI/2;ground.position.y=-.12;group.add(ground);
+ const imagery=satelliteGround(group,snapshot.origin);
  polygonSurface(group,snapshot.parks,parkMat,-.066);
  polygonSurface(group,snapshot.water,waterMat,-.055);
  drawRoads(group,snapshot.roads);
@@ -206,10 +208,10 @@ export function makeGeoWorld(parent,snapshot){
  const billboardCount=decorate(group,snapshot);
  const nearby=buildSpatialIndex(snapshot.buildings);
  const spawn=safeSpawn(snapshot,nearby);
- return {group,spawn,nearby,stats:{
+ return {group,spawn,nearby,dispose:()=>imagery.dispose(),stats:{
   buildings:buildingCount,roads:snapshot.roads.length,
   parks:snapshot.parks.length,water:snapshot.water.length,
   rail:snapshot.rail.length,billboards:billboardCount,
-  geoCenter:snapshot.origin
+  geoCenter:snapshot.origin,satelliteTiles:imagery.tileCount
  }};
 }
