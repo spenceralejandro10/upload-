@@ -10,10 +10,6 @@ import {planAdvertising} from "./adPlacement.js";
  * Pantallas agrupadas por textura con InstancedMesh. Perfiles y bordes
  * instanciados para evitar cientos de draw calls por cartel.
  */
-const BASE_COLOR=new THREE.Color(0x1a2635);
-const UNIT_BOX=new THREE.BoxGeometry(1,1,1);
-const UNIT_PLANE=new THREE.PlaneGeometry(1,1);
-const HIGHLIGHT_COLORS=["#6ce7ff","#fba8f4","#ffe8aa","#83ffd7"];
 
 function signCanvas(entry){
  const canvas=document.createElement("canvas");canvas.width=512;canvas.height=320;
@@ -69,11 +65,11 @@ function writeInstance(mesh,i,entry,scale,y,depth){
  const dummy=new THREE.Object3D();dummy.position.copy(position);dummy.quaternion.copy(quaternion);
  dummy.scale.set(...scale);dummy.updateMatrix();mesh.setMatrixAt(i,dummy.matrix);
 }
-function addHardware(parent,entries){
+function addHardware(parent,entries,unitBox){
  const housingMat=new THREE.MeshStandardMaterial({color:0x192535,metalness:.7,roughness:.39});
- const housing=new THREE.InstancedMesh(UNIT_BOX,housingMat,entries.length);
+ const housing=new THREE.InstancedMesh(unitBox,housingMat,entries.length);
  housing.name="B04 mural frames on real buildings";
- const edges=new THREE.InstancedMesh(UNIT_BOX,new THREE.MeshBasicMaterial({
+ const edges=new THREE.InstancedMesh(unitBox,new THREE.MeshBasicMaterial({
   color:0xffffff,vertexColors:true,toneMapped:false
  }),entries.length*4);
  edges.name="B04 illuminated framing";
@@ -115,6 +111,7 @@ export function makeAdvertising3D(parent,snapshot,streetIndex,options={}){
  if(!entries.length)return {count:0,zone:plan.zone,
   update(){},dispose(){},breakdown:{anchors:0,local:0}};
  const groups=new Map(),materials=[],textures=[];
+ const unitBox=new THREE.BoxGeometry(1,1,1),unitPlane=new THREE.PlaneGeometry(1,1);
  for(let i=0;i<entries.length;i++){
   const entry=entries[i];
   const key=[entry.label,entry.sub,entry.color,entry.kind].join("|");
@@ -124,7 +121,7 @@ export function makeAdvertising3D(parent,snapshot,streetIndex,options={}){
  for(const list of groups.values()){
   const {texture,material}=createBillboardMaterial(list[0]);
   textures.push(texture);materials.push(material);
-  const mesh=new THREE.InstancedMesh(UNIT_PLANE,material,list.length);
+  const mesh=new THREE.InstancedMesh(unitPlane,material,list.length);
   mesh.name="B04 building-attached LED billboards";
   mesh.frustumCulled=false;
   for(let i=0;i<list.length;i++){
@@ -133,7 +130,7 @@ export function makeAdvertising3D(parent,snapshot,streetIndex,options={}){
   mesh.instanceMatrix.needsUpdate=true;
   group.add(mesh);
  }
- const hardware=addHardware(group,entries);
+ const hardware=addHardware(group,entries,unitBox);
  let lastCycle=-1;
  return {
   count:entries.length,zone:plan.zone,
@@ -152,7 +149,7 @@ export function makeAdvertising3D(parent,snapshot,streetIndex,options={}){
    for(const material of materials)material.dispose();
    hardware.housingMat.dispose();
    hardware.edgeMat.dispose();
-   group.traverse(obj=>{if(obj.isMesh||obj.isInstancedMesh)obj.geometry=null;});
+   // Zone-local geometries are released by TokyoCity.dispose().
   }
  };
 }
